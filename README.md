@@ -157,64 +157,64 @@ Optional: outAsJson
 
 ### ** Method setCloudSecurityGroupProtectionMode
 
-Task: gets one aws sec group
+Task: set single sg protection mode 
 
 Params: 
 
- Mandatory: ID(str)
+ Mandatory: ID(str), protectionMode(str)
 Optional: outAsJson
 
 ### ** Method getCloudSecurityGroupByVpcName
 
-Task: gets one aws sec group
+Task: gets sec groups attached to a vpc 
 
 Params: 
 
- Mandatory: ID(str)
-Optional: outAsJson
+ Mandatory: vpcName(str)
+Optional: 
 
 Class : Dome9ApiClient
 
 ### ** Method getAllCloudSecurityGroupsInRegion
 
-Task: gets one aws sec group
+Task: gets all sec groups in a region 
 
 Params: 
 
- Mandatory: ID(str)
-Optional: outAsJson
+ Mandatory: region(str), names(bool)[output list of names]
+Optional: 
 
 Class : Dome9ApiClient
 
-### ** Method setAllCloudSecurityGroupsInRegion
+### ** Method setCloudSecurityGroupsProtectionMode
 
-Task: gets one aws sec group
+Task: set protection mode for all sec groups in the same region
 
 Params: 
 
- Mandatory: ID(str)
-Optional: outAsJson
+ Mandatory: region(str), protectionMode(str)
+Optional: 
 
 Class : Dome9ApiClient
 
 ### ** Method getAllSecurityGroupIDsOfVpc
 
-Task: gets one aws sec group
+Task: gets all sec group IDs of a specific VPC
 
 Params: 
 
- Mandatory: ID(str)
-Optional: outAsJson
+ Mandatory: vpcID(str)
+Optional: 
 
 Class : Dome9ApiClient
 
 ### ** Method setVpcProtectionMode
 
-Task: gets one aws sec group
+Task: set the vpc protection mode 
 
 Params: 
 
- Mandatory: ID(str)
+ Mandatory: vpcID(str), protectionMode(str)
 Optional: outAsJson
 
 Class : Dome9ApiClient
