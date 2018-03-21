@@ -4,7 +4,6 @@ Dome9 Api Client - Python SDK
 
 Author - Udi-Yehuda Tamar [udi@dome9.com](mailto:udi@dome9.com) 
 
-[[TOC]]
 
 # Classes
 
