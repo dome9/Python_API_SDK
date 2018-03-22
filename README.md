@@ -85,9 +85,9 @@ Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage
 Optional: regions (list[]) 
 
 
-### ** Method setVpcProtectionMode
+### ** Method setAllSecurityGroupsProtectionModeOfVpc
 
-Task: set the vpc protection mode 
+Task: set protection mode of all attched security groups in a spesific VPC
 
 Params: 
 
