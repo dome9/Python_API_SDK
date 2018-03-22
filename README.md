@@ -132,7 +132,8 @@ Task: set cloud region protection mode , providing regions param will effect the
 
 Params: 
 
- Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
+Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
+
 Optional: regions (list[]) 
 
 Class : Dome9ApiClient
@@ -144,6 +145,7 @@ Task: gets all aws sec groups
 Params: 
 
  Mandatory: 
+ 
 Optional: outAsJson
 
 ### ** Method getAwsSecurityGroup
@@ -153,6 +155,7 @@ Task: gets one aws sec group
 Params: 
 
  Mandatory: ID(str)
+ 
 Optional: outAsJson
 
 ### ** Method setCloudSecurityGroupProtectionMode
@@ -162,6 +165,7 @@ Task: set single sg protection mode
 Params: 
 
  Mandatory: ID(str), protectionMode(str)
+ 
 Optional: outAsJson
 
 ### ** Method getCloudSecurityGroupByVpcName
@@ -171,6 +175,7 @@ Task: gets sec groups attached to a vpc
 Params: 
 
  Mandatory: vpcName(str)
+ 
 Optional: 
 
 Class : Dome9ApiClient
@@ -182,6 +187,7 @@ Task: gets all sec groups in a region
 Params: 
 
  Mandatory: region(str), names(bool)[output list of names]
+ 
 Optional: 
 
 Class : Dome9ApiClient
@@ -204,6 +210,7 @@ Task: gets all sec group IDs of a specific VPC
 Params: 
 
  Mandatory: vpcID(str)
+ 
 Optional: 
 
 Class : Dome9ApiClient
@@ -215,6 +222,7 @@ Task: set the vpc protection mode
 Params: 
 
  Mandatory: vpcID(str), protectionMode(str)
+ 
 Optional: outAsJson
 
 Class : Dome9ApiClient
