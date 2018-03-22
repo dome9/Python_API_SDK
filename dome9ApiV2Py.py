@@ -146,20 +146,16 @@ class Dome9ApiSDK(object):
 
 
 class Dome9ApiClient(Dome9ApiSDK):
-
-	def getCloudSecurityGroupByVpcName(self, vpcName):
-		# Methods returns None by default
-		allGrps = self.getAwsSecurityGroups()
-		for grp in allGrps:
-			if grp['vpcId'] == vpcName:
-				return grp['id']
-
+    	
 	def getCloudSecurityGroupsInRegion(self, region, names=False):
 		groupID = 'name' if names else 'id'
 		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['regionId'] == region]
 
 	def getCloudSecurityGroupsIDsOfVpc(self, vpcID):
 		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
+
+	def getCloudSecurityGroupIDsOfVpc(self, vpcID):
+    		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
 
 	def setCloudRegionsProtectedMode(self, ID, protectionMode, regions='all'):
 		if protectionMode not in Dome9ApiSDK.REGION_PROTECTION_MODES:
@@ -180,14 +176,14 @@ class Dome9ApiClient(Dome9ApiSDK):
 			self.put(route='cloudaccounts/region-conf', payload=data)
 
 	def setCloudSecurityGroupsProtectionModeInRegion(self, region, protectionMode):
-    		secGrpsRegion = self.getAllCloudSecurityGroupsInRegion(region=region)
+    		secGrpsRegion = self.getCloudSecurityGroupsInRegion(region=region)
 		if not secGrpsRegion:
 			raise ValueError('got 0 security groups!')
 		for secGrpID in secGrpsRegion:
 			self.setCloudSecurityGroupProtectionMode(ID=secGrpID, protectionMode=protectionMode, outAsJson=True)
 
 	def setCloudSecurityGroupsProtectionModeOfVpc(self, vpcID, protectionMode):
-		vpcSecGrp = self.getAllSecurityGroupIDsOfVpc(vpcID=vpcID)
+		vpcSecGrp = self.getCloudSecurityGroupIDsOfVpc(vpcID=vpcID)
 		if not vpcSecGrp:
 			raise ValueError('got 0 security groups!')
 		for secGrpID in vpcSecGrp:
