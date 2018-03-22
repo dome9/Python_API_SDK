@@ -63,14 +63,82 @@ print(call)</td>
   </tr>
 </table>
 
-
-# Api Methods 
+# Dome9 API  
 
 ## General guidelines 
 
 * All methods by default are returning python object  or none value 
 
 * outAsJson(bool) - optional param prints json (as string stdout) to the shell’s console. 
+
+
+## Dome9 Tools
+
+### ** Method setCloudRegionsProtectedMode
+
+Task: set cloud region protection mode , providing regions param will effect the requested protection mode , by default method runs on all user’s regions.
+
+Params: 
+
+Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
+
+Optional: regions (list[]) 
+
+
+### ** Method setCloudSecurityGroupsProtectionModeOfVpc
+
+Task: set protection mode of all attched security groups in a spesific VPC
+
+Params: 
+
+Mandatory: vpcID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage'
+ 
+Optional: outAsJson
+
+
+### ** Method setCloudSecurityGroupsProtectionModeInRegion
+
+Task: set protection mode for all security groups in spesific region
+
+Params: 
+
+Mandatory: region(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage'
+
+Optional: 
+
+
+### ** Method getCloudSecurityGroupByVpcName
+
+Task: gets sec groups attached to a vpc 
+
+Params: 
+
+ Mandatory: vpcName(str)
+ 
+Optional: 
+
+### ** Method getAllCloudSecurityGroupsInRegion
+
+Task: gets all sec groups in a region 
+
+Params: 
+
+ Mandatory: region(str), names(bool)[output list of names]
+ 
+Optional: 
+
+### ** Method getAllSecurityGroupIDsOfVpc
+
+Task: gets all sec group IDs of a specific VPC
+
+Params: 
+
+ Mandatory: vpcID(str)
+ 
+Optional: 
+
+
+## SDK Methods 
 
 ### ** Method getAllUsers
 
@@ -126,17 +194,6 @@ Params:
 
 Optional: outAsJson 
 
-### ** Method setCloudRegionsProtectedMode
-
-Task: set cloud region protection mode , providing regions param will effect the requested protection mode , by default method runs on all user’s regions.
-
-Params: 
-
- Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
-Optional: regions (list[]) 
-
-Class : Dome9ApiClient
-
 ### ** Method getAwsSecurityGroups
 
 Task: gets all aws sec groups 
@@ -144,6 +201,7 @@ Task: gets all aws sec groups
 Params: 
 
  Mandatory: 
+ 
 Optional: outAsJson
 
 ### ** Method getAwsSecurityGroup
@@ -153,6 +211,7 @@ Task: gets one aws sec group
 Params: 
 
  Mandatory: ID(str)
+ 
 Optional: outAsJson
 
 ### ** Method setCloudSecurityGroupProtectionMode
@@ -162,62 +221,9 @@ Task: set single sg protection mode
 Params: 
 
  Mandatory: ID(str), protectionMode(str)
+ 
 Optional: outAsJson
 
-### ** Method getCloudSecurityGroupByVpcName
-
-Task: gets sec groups attached to a vpc 
-
-Params: 
-
- Mandatory: vpcName(str)
-Optional: 
-
-Class : Dome9ApiClient
-
-### ** Method getAllCloudSecurityGroupsInRegion
-
-Task: gets all sec groups in a region 
-
-Params: 
-
- Mandatory: region(str), names(bool)[output list of names]
-Optional: 
-
-Class : Dome9ApiClient
-
-### ** Method setCloudSecurityGroupsProtectionMode
-
-Task: set protection mode for all sec groups in the same region
-
-Params: 
-
- Mandatory: region(str), protectionMode(str)
-Optional: 
-
-Class : Dome9ApiClient
-
-### ** Method getAllSecurityGroupIDsOfVpc
-
-Task: gets all sec group IDs of a specific VPC
-
-Params: 
-
- Mandatory: vpcID(str)
-Optional: 
-
-Class : Dome9ApiClient
-
-### ** Method setVpcProtectionMode
-
-Task: set the vpc protection mode 
-
-Params: 
-
- Mandatory: vpcID(str), protectionMode(str)
-Optional: outAsJson
-
-Class : Dome9ApiClient
 
 
 
