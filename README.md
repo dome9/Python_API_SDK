@@ -72,7 +72,7 @@ print(call)</td>
 * outAsJson(bool) - optional param prints json (as string stdout) to the shell’s console. 
 
 
-# Dome9 Tools
+## Dome9 Tools
 
 ## Method - Set VPC Protection Mode 
 
@@ -133,7 +133,7 @@ Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage
 
 Optional: regions (list[]) 
 
-# SDK Methods 
+## SDK Methods 
 
 ### ** Method getAllUsers
 
