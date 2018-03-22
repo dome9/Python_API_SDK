@@ -85,24 +85,25 @@ Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage
 Optional: regions (list[]) 
 
 
-### ** Method setAllSecurityGroupsProtectionModeOfVpc
+### ** Method setCloudSecurityGroupsProtectionModeOfVpc
 
 Task: set protection mode of all attched security groups in a spesific VPC
 
 Params: 
 
-Mandatory: vpcID(str), protectionMode(str)
+Mandatory: vpcID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage'
  
 Optional: outAsJson
 
 
-### ** Method setCloudSecurityGroupsProtectionMode
+### ** Method setCloudSecurityGroupsProtectionModeInRegion
 
-Task: set protection mode for all sec groups in the same region
+Task: set protection mode for all security groups in spesific region
 
 Params: 
 
- Mandatory: region(str), protectionMode(str)
+Mandatory: region(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage'
+
 Optional: 
 
 
