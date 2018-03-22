@@ -74,6 +74,17 @@ print(call)</td>
 
 ## Dome9 Tools
 
+### ** Method setCloudRegionsProtectedMode
+
+Task: set cloud region protection mode , providing regions param will effect the requested protection mode , by default method runs on all user’s regions.
+
+Params: 
+
+Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
+
+Optional: regions (list[]) 
+
+
 ### ** Method setVpcProtectionMode
 
 Task: set the vpc protection mode 
@@ -84,15 +95,6 @@ Mandatory: vpcID(str), protectionMode(str)
  
 Optional: outAsJson
 
-### ** Method setCloudRegionsProtectedMode
-
-Task: set cloud region protection mode , providing regions param will effect the requested protection mode , by default method runs on all user’s regions.
-
-Params: 
-
-Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
-
-Optional: regions (list[]) 
 
 ### ** Method setCloudSecurityGroupsProtectionMode
 
