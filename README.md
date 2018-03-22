@@ -84,6 +84,26 @@ Mandatory: vpcID(str), protectionMode(str)
  
 Optional: outAsJson
 
+### ** Method setCloudRegionsProtectedMode
+
+Task: set cloud region protection mode , providing regions param will effect the requested protection mode , by default method runs on all user’s regions.
+
+Params: 
+
+Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
+
+Optional: regions (list[]) 
+
+### ** Method setCloudSecurityGroupsProtectionMode
+
+Task: set protection mode for all sec groups in the same region
+
+Params: 
+
+ Mandatory: region(str), protectionMode(str)
+Optional: 
+
+
 ### ** Method getCloudSecurityGroupByVpcName
 
 Task: gets sec groups attached to a vpc 
@@ -104,15 +124,6 @@ Params:
  
 Optional: 
 
-### ** Method setCloudSecurityGroupsProtectionMode
-
-Task: set protection mode for all sec groups in the same region
-
-Params: 
-
- Mandatory: region(str), protectionMode(str)
-Optional: 
-
 ### ** Method getAllSecurityGroupIDsOfVpc
 
 Task: gets all sec group IDs of a specific VPC
@@ -123,15 +134,6 @@ Params:
  
 Optional: 
 
-### ** Method setCloudRegionsProtectedMode
-
-Task: set cloud region protection mode , providing regions param will effect the requested protection mode , by default method runs on all user’s regions.
-
-Params: 
-
-Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
-
-Optional: regions (list[]) 
 
 ## SDK Methods 
 
