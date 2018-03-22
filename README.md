@@ -63,6 +63,20 @@ print(call)</td>
   </tr>
 </table>
 
+# Dome9 Tools
+
+## Method - Set VPC Protection Mode 
+
+Task: set the vpc protection mode 
+
+Params: 
+
+Mandatory: vpcID(str), protectionMode(str)
+ 
+Optional: outAsJson
+
+Class : Dome9ApiClient
+
 
 # Api Methods 
 
@@ -212,18 +226,6 @@ Params:
  Mandatory: vpcID(str)
  
 Optional: 
-
-Class : Dome9ApiClient
-
-### ** Method setVpcProtectionMode
-
-Task: set the vpc protection mode 
-
-Params: 
-
- Mandatory: vpcID(str), protectionMode(str)
- 
-Optional: outAsJson
 
 Class : Dome9ApiClient
 
