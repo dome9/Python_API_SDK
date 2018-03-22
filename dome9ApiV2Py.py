@@ -12,14 +12,12 @@ class Dome9ApiSDK(object):
 		self.apiKeyID = apiKeyID
 		self.apiSecret = apiSecret
 		self.apiAddress = apiAddress
-		# self.outAsJson = outAsJson
 		self.apiVersion = '/{}/'.format(apiVersion)
 		self.baseAddress = self.apiAddress + self.apiVersion
 		self.clientAuth = auth.HTTPBasicAuth(self.apiKeyID, self.apiSecret)
 		self.restHeaders = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 		if not self.apiKeyID or not self.apiSecret:
-			print('Cannot create api client instance without keyID and secret!')
-			exit(1)
+			raise Exception('Cannot create api client instance without keyID and secret!')
 
 # System methods
 	def get(self, route, payload=None):
@@ -149,6 +147,20 @@ class Dome9ApiSDK(object):
 
 class Dome9ApiClient(Dome9ApiSDK):
 
+	def getCloudSecurityGroupByVpcName(self, vpcName):
+		# Methods returns None by default
+		allGrps = self.getAwsSecurityGroups()
+		for grp in allGrps:
+			if grp['vpcId'] == vpcName:
+				return grp['id']
+
+	def getCloudSecurityGroupsInRegion(self, region, names=False):
+		groupID = 'name' if names else 'id'
+		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['regionId'] == region]
+
+	def getCloudSecurityGroupsIDsOfVpc(self, vpcID):
+		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
+
 	def setCloudRegionsProtectedMode(self, ID, protectionMode, regions='all'):
 		if protectionMode not in Dome9ApiSDK.REGION_PROTECTION_MODES:
 			raise ValueError('Valid modes are: {}'.format(Dome9ApiSDK.REGION_PROTECTION_MODES))
@@ -158,8 +170,7 @@ class Dome9ApiClient(Dome9ApiSDK):
 			cloudAccountRegions = allUsersRegions
 		else:
 			if not set(regions).issubset(allUsersRegions):
-				print('requested regions:{} are not a valid regions, available:{}'.format(regions, allUsersRegions))
-				exit(1)
+				raise Exception('requested regions:{} are not a valid regions, available:{}'.format(regions, allUsersRegions))
 			cloudAccountRegions = regions
 
 		for region in cloudAccountRegions:
@@ -168,28 +179,14 @@ class Dome9ApiClient(Dome9ApiSDK):
 			print('updating data: {}'.format(data))
 			self.put(route='cloudaccounts/region-conf', payload=data)
 
-	def getCloudSecurityGroupByVpcName(self, vpcName):
-		# Methods returns None by default
-		allGrps = self.getAwsSecurityGroups()
-		for grp in allGrps:
-			if grp['vpcId'] == vpcName:
-				return grp['id']
-
-	def getAllCloudSecurityGroupsInRegion(self, region, names=False):
-		groupID = 'name' if names else 'id'
-		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['regionId'] == region]
-
-	def setCloudSecurityGroupsProtectionMode(self, region, protectionMode):
-		secGrpsRegion = self.getAllCloudSecurityGroupsInRegion(region=region)
+	def setCloudSecurityGroupsProtectionModeInRegion(self, region, protectionMode):
+    		secGrpsRegion = self.getAllCloudSecurityGroupsInRegion(region=region)
 		if not secGrpsRegion:
 			raise ValueError('got 0 security groups!')
 		for secGrpID in secGrpsRegion:
 			self.setCloudSecurityGroupProtectionMode(ID=secGrpID, protectionMode=protectionMode, outAsJson=True)
 
-	def getAllSecurityGroupIDsOfVpc(self, vpcID):
-		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
-
-	def setVpcProtectionMode(self, vpcID, protectionMode):
+	def setCloudSecurityGroupsProtectionModeOfVpc(self, vpcID, protectionMode):
 		vpcSecGrp = self.getAllSecurityGroupIDsOfVpc(vpcID=vpcID)
 		if not vpcSecGrp:
 			raise ValueError('got 0 security groups!')
