@@ -179,7 +179,7 @@ class Dome9ApiClient(Dome9ApiSDK):
 		groupID = 'name' if names else 'id'
 		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['regionId'] == region]
 
-	def setAllCloudSecurityGroupsInRegion(self, region, protectionMode):
+	def setCloudSecurityGroupsProtectionMode(self, region, protectionMode):
 		secGrpsRegion = self.getAllCloudSecurityGroupsInRegion(region=region)
 		if not secGrpsRegion:
 			raise ValueError('got 0 security groups!')
