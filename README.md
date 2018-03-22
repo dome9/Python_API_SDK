@@ -74,7 +74,7 @@ print(call)</td>
 
 ## Dome9 Tools
 
-## Method - Set VPC Protection Mode 
+## ** Method setVpcProtectionMode
 
 Task: set the vpc protection mode 
 
