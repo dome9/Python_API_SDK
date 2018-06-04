@@ -1,5 +1,5 @@
 # Description
-The Tool run sync now and wait for all entities to be updates, then it wil run you assessment.
+The Tool run sync now and wait for all entities to be updates, then it wil run bundle assessment.
 
 # Prerequisite 
 
@@ -49,9 +49,9 @@ require: True
 
 **assessmentTemplateID:**
 
-Description: Dome9 API key
+Description: assessment bundle id
 
-Type: string
+Type: number
 
 require: True
 
