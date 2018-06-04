@@ -1,5 +1,5 @@
 # Description
-The Tool run sync now and wait for all entities to be updates, then it wil run you assessment.
+The Tool run sync now and wait for all entities to be updates, then it wil run bundle assessment.
 
 # Prerequisite 
 
@@ -23,33 +23,50 @@ The Tool run sync now and wait for all entities to be updates, then it wil run y
 
 # Parameters
 
-apiKeyID
+**apiKeyID:**
 
 Description: Dome9 API key
+
+Type: string
+
 require: True
- 
-secretKey
+
+**secretKey:**
 
 Description: Dome9 secret key
+
+Type: string
+
 require: True
 
-cloudAccountID
+**cloudAccountID:**
 
 Description: vendor cloud account id
+
 Type: string
+
 require: True
 
-assessmentTemplateID
+**assessmentTemplateID:**
 
-Description: Dome9 API key
+Description: assessment bundle id
+
+Type: number
+
 require: True
 
-assessmentRegion
+**assessmentRegion:**
+
 Description: Vendor region
 
-require: False
 Type: string
 
-assessmentCloudAccountType
 require: False
-Allowd paramaters:  'AWS', 'AZURE', 'GCP'
+
+**assessmentCloudAccountType:**
+
+require: False
+
+Type: string
+
+Allowed paramaters:  'AWS', 'AZURE', 'GCP'
