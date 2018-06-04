@@ -5,7 +5,7 @@ import datetime
 from datetime import datetime as timeFunc
 import uuid
 import argparse
-import sys
+import json
 
 
 class FetchEntityStatus(object):
@@ -81,11 +81,9 @@ class FetchEntityStatus(object):
 		
 		self.cloudAccountID = inputArgs.cloudAccountID
 		self.assessmentTemplateID = inputArgs.assessmentTemplateID
-		if inputArgs.assessmentRegion:
-			self.assessmentRegion = inputArgs.assessmentRegion
-		if inputArgs.assessmentCloudAccountType:
-			self.assessmentCloudAccountType = inputArgs.assessmentCloudAccountType
-			
+		self.assessmentRegion = inputArgs.assessmentRegion if inputArgs.assessmentRegion else None
+		self.assessmentCloudAccountType = inputArgs.assessmentCloudAccountType if inputArgs.assessmentCloudAccountType else None
+		
 		self.d9client = Dome9ApiClient(apiKeyID=inputArgs.apiKeyID, apiSecret=inputArgs.secretKey)
 		self.accountId = self.d9client.getCloudAccountID(self.cloudAccountID, outAsJson=True)['id']
 		self.feachStatusList = []
@@ -147,7 +145,16 @@ class FetchEntityStatus(object):
 				entityID = '{}-{}'.format(entityName, region)
 				if entityObjectID == entityID:
 					entityObject['isUpdated'] = True
-				
+	
+	def getUnUpdatedEntities(self):
+		unUpdatedList = []
+		for entity in self.feachStatusList:
+			for entityObjectID, entityObject in entity.iteritems():
+				if not entityObject['isUpdated'] and not entityObject['type'] in unUpdatedList:
+					unUpdatedList.append(entityObject['type'])
+		return unUpdatedList
+					
+					
 	def isFetchUpdated(self, startedTime, runTime):
 		if runTime == FetchEntityStatus.EMPTY_DATE:
 			return False
@@ -158,16 +165,19 @@ class FetchEntityStatus(object):
 	def runAssessmentBundle(self):
 		bundle = {
 			'id': self.assessmentTemplateID,
-			'region': None or self.assessmentRegion,
 			'cloudAccountId': self.accountId,
-			'requestId': str(uuid.uuid4()),
-			'cloudAccountType': None or self.assessmentCloudAccountType
+			'requestId': str(uuid.uuid4())
 		}
+		
+		if self.assessmentRegion:
+			bundle['region'] = self.assessmentRegion
+		if self.assessmentCloudAccountType:
+			bundle['cloudAccountType'] = self.assessmentCloudAccountType
+			
 		call = self.d9client.runAssessmenBundle(bundle, outAsJson=True)
 		return call
 	
 	def fetchAllEntityStatus(self):
-		
 		self.buildFetchList()
 		print('Process sync now...')
 		call = self.d9client.cloudAccountSyncNow(self.accountId, outAsJson=True)
@@ -184,7 +194,8 @@ class FetchEntityStatus(object):
 						self.updateFetchStatus(apiEntityStatus['entityType'], apiEntityStatus['region'])
 			timeCount += 1
 			if timeCount == FetchEntityStatus.RUN_TIME_OUT:
-				sys.exit("Data didn't synced in time, list")
+				print ("unupdated entities: {}".format(json.dumps(self.getUnUpdatedEntities())))
+				break
 			print ('{}: Entities Updated: {}/{}'.format(timeCount, self.getFetchFinishedCount(), len(self.feachStatusList)))
 			time.sleep(FetchEntityStatus.RUN_INTERVALS)
 		self.runAssessmentBundle()
