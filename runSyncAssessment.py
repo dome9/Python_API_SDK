@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from dome9ApiV2Py import Dome9ApiClient
-import time, json
+import time
 import datetime
 from datetime import datetime as timeFunc
 import uuid
@@ -10,7 +10,7 @@ import sys
 
 class FetchEntityStatus(object):
 	EMPTY_DATE = '0001-01-01T00:00:00Z'
-	RUN_TIME_OUT = 30
+	RUN_TIME_OUT = 40
 	RUN_INTERVALS = 60
 	SERVICES = [
 		"AzurePublicIP",
