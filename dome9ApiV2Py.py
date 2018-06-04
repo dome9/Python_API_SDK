@@ -35,7 +35,7 @@ class Dome9ApiSDK(object):
 	def delete(self, route, payload=None):
 		return self.request('delete', route, payload)
 
-	def request(self, method, route, payload=None):
+	def request(self, method, route, payload=None, isV2=True):
 		res = None
 		url = None
 		try:
@@ -133,6 +133,18 @@ class Dome9ApiSDK(object):
 			print(json.dumps(apiCall))
 		return apiCall
 
+	def getAllEntityFetchStatus(self, ID, outAsJson=False):
+		apiCall = self.get(route='EntityFetchStatus?externalAccountNumber={}'.format(ID))
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+	
+	def cloudAccountSyncNow(self, ID, outAsJson=False):
+		apiCall = self.post(route='cloudaccounts/{}/SyncNow'.format(ID))
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+
 	def setCloudSecurityGroupProtectionMode(self, ID, protectionMode, outAsJson=False):
 		if protectionMode not in Dome9ApiSDK.SEC_GRP_PROTECTION_MODES:
 			raise ValueError('Valid modes are: {}'.format(Dome9ApiSDK.SEC_GRP_PROTECTION_MODES))
@@ -143,6 +155,15 @@ class Dome9ApiSDK(object):
 		if outAsJson:
 			print(json.dumps(apiCall))
 		return apiCall
+	
+	def runAssessmenBundle(self, assReq, outAsJson=False): # assessmentRequest
+		data = json.dumps(assReq)
+		route = 'assessment/bundleV2'
+		apiCall = self.post(route=route, payload=data)
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+	
 
 
 class Dome9ApiClient(Dome9ApiSDK):
