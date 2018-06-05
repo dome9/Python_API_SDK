@@ -1,6 +1,10 @@
 # Description
 The Tool run sync now and wait for all entities to be updates, then it wil run bundle assessment.
 
+# Example
+runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --secretKey {secretKey} --apiKeyID {apiKeyID}
+
+
 # Prerequisite 
 
 * Dome9 API keyID and secret 
