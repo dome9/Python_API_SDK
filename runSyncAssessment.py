@@ -6,7 +6,7 @@ from datetime import datetime as timeFunc
 import uuid
 import argparse
 import json
-
+import sys
 
 class FetchEntityStatus(object):
 	EMPTY_DATE = '0001-01-01T00:00:00Z'
@@ -45,7 +45,6 @@ class FetchEntityStatus(object):
 		"VpcFlowLogs",
 		"AzureResourceGroup",
 		"VpcPeeringConnection",
-		"Sns",
 		"IamCredentialReport",
 		"MetricAlarms",
 		"RedshiftCluster",
@@ -131,6 +130,8 @@ class FetchEntityStatus(object):
 	
 	def buildFetchList(self):
 		entityStatusList = self.d9client.getAllEntityFetchStatus(self.cloudAccountID)
+		if not entityStatusList:
+			sys.exit("Fetch status list is empty, exit.")
 		for entityStatus in entityStatusList:
 			if self.validateService(entityStatus['entityType']):
 				entityObject = self.returnEntityStatusObject(entityStatus['entityType'], entityStatus['region'])
@@ -174,7 +175,7 @@ class FetchEntityStatus(object):
 		if self.assessmentCloudAccountType:
 			bundle['cloudAccountType'] = self.assessmentCloudAccountType
 			
-		call = self.d9client.runAssessmenBundle(bundle, outAsJson=True)
+		call = self.d9client.runAssessmenBundle(bundle)
 		return call
 	
 	def fetchAllEntityStatus(self):
@@ -186,6 +187,7 @@ class FetchEntityStatus(object):
 		timeCount = 0
 		while not self.isFetchFinished():
 			apiEntityStatusList = self.d9client.getAllEntityFetchStatus(self.cloudAccountID)
+			print(apiEntityStatusList)
 			for apiEntityStatus in apiEntityStatusList:
 				if self.validateService(apiEntityStatus['entityType']):
 					isSuccessRun = self.isFetchUpdated(startedTime, apiEntityStatus['lastSuccessfulRun'])
