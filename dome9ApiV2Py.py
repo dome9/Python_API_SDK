@@ -134,7 +134,7 @@ class Dome9ApiSDK(object):
 		return apiCall
 
 	def getAllEntityFetchStatus(self, ID, outAsJson=False):
-		apiCall = self.get(route='EntityFetchStatus?externalAccountNumber={}'.format(ID))
+		apiCall = self.get(route='EntityFetchStatus?cloudAccountId={}'.format(ID))
 		
 		if outAsJson:
 			print(json.dumps(apiCall))
