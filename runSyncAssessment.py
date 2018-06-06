@@ -101,14 +101,11 @@ class FetchEntityStatus(object):
 		
 	
 	def getDifTime(self, currentTime, inputTime):
-		inputFormatTime = ' '.join(inputTime.split('Z')[0].split('T'))
-		try:
-			inputTimeStamp = int(datetime.datetime.strptime(inputFormatTime, '%Y-%m-%d %H:%M:%S.%f').strftime("%s"))
-		except:
-			inputTimeStamp = int(datetime.datetime.strptime(inputFormatTime, '%Y-%m-%d %H:%M:%S').strftime("%s"))
+		inputFormatTime = ' '.join(inputTime.split('.')[0].split('T'))
+		inputTimeStamp = int(timeFunc.strptime(inputFormatTime, '%Y-%m-%d %H:%M:%S').strftime("%s"))
 		
 		currentFormatTime = currentTime.split('.')[0]
-		currentTimeStamp = int(datetime.datetime.strptime(currentFormatTime, '%Y-%m-%d %H:%M:%S').strftime("%s"))
+		currentTimeStamp = int(timeFunc.strptime(currentFormatTime, '%Y-%m-%d %H:%M:%S').strftime("%s"))
 		
 		diftime = inputTimeStamp - currentTimeStamp
 		return diftime
