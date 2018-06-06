@@ -2,7 +2,13 @@
 The Tool run sync now and wait for all entities to be updates, then it wil run bundle assessment.
 
 # Example
-runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --secretKey {secretKey} --apiKeyID {apiKeyID}
+
+**example to use AWS external account id:**
+runSyncAssessment.py --assessmentTemplateID -4 --externalAccountNumber 123456789 --secretKey {secretKey} --apiKeyID {apiKeyID}
+
+**example to use any vendor with dome9 cloud account id:**
+runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --assessmentCloudAccountType AWS --secretKey {secretKey} --apiKeyID {apiKeyID}
+
 
 
 # Prerequisite 
@@ -49,7 +55,16 @@ Description: vendor cloud account id
 
 Type: string
 
-require: True
+require: require cloudAccountID or externalAccountNumber
+
+**externalAccountNumber:**
+
+Description: AWS cloud account id
+
+Type: string
+
+require: require cloudAccountID or externalAccountNumber
+
 
 **assessmentTemplateID:**
 
