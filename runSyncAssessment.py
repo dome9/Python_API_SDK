@@ -77,15 +77,27 @@ class FetchEntityStatus(object):
 	NONE_REGION_NAME = "regionless"
 	
 	def __init__(self, inputArgs):
-		
-		self.cloudAccountID = inputArgs.cloudAccountID
+		self.feachStatusList = []
 		self.assessmentTemplateID = inputArgs.assessmentTemplateID
 		self.assessmentRegion = inputArgs.assessmentRegion if inputArgs.assessmentRegion else None
 		self.assessmentCloudAccountType = inputArgs.assessmentCloudAccountType if inputArgs.assessmentCloudAccountType else None
+		self.externalAccountNumber = inputArgs.externalAccountNumber if inputArgs.externalAccountNumber else None
+		self.cloudAccountID = inputArgs.cloudAccountID if inputArgs.cloudAccountID else None
 		
+		if not self.cloudAccountID and not self.externalAccountNumber:
+			sys("You must use on os the following: --cloudAccountId or --externalAccountNumber")
+
 		self.d9client = Dome9ApiClient(apiKeyID=inputArgs.apiKeyID, apiSecret=inputArgs.secretKey)
-		self.accountId = self.d9client.getCloudAccountID(self.cloudAccountID, outAsJson=True)['id']
-		self.feachStatusList = []
+		
+		if self.externalAccountNumber:
+			self.accountId = self.d9client.getCloudAccountID(self.externalAccountNumber)['id']
+			self.assessmentCloudAccountType = "AWS"
+		if self.cloudAccountID:
+			self.accountId = self.cloudAccountID
+			if not self.assessmentCloudAccountType:
+				sys.exit("cloudAccountID require using: --assessmentCloudAccountType")
+			
+		
 		
 	
 	def getDifTime(self, currentTime, inputTime):
@@ -127,9 +139,9 @@ class FetchEntityStatus(object):
 			'region': region,
 			'isUpdated': False
 		}}
-	
+		
 	def buildFetchList(self):
-		entityStatusList = self.d9client.getAllEntityFetchStatus(self.cloudAccountID)
+		entityStatusList = self.d9client.getAllEntityFetchStatus(self.accountId)
 		if not entityStatusList:
 			sys.exit("Fetch status list is empty, exit.")
 		for entityStatus in entityStatusList:
@@ -155,13 +167,11 @@ class FetchEntityStatus(object):
 					unUpdatedList.append(entityObject['type'])
 		return unUpdatedList
 					
-					
 	def isFetchUpdated(self, startedTime, runTime):
 		if runTime == FetchEntityStatus.EMPTY_DATE:
 			return False
 		diferanceInMs = self.getDifTime(str(startedTime), runTime)
 		return True if diferanceInMs >= 0 else False
-	
 	
 	def runAssessmentBundle(self):
 		bundle = {
@@ -175,19 +185,18 @@ class FetchEntityStatus(object):
 		if self.assessmentCloudAccountType:
 			bundle['cloudAccountType'] = self.assessmentCloudAccountType
 			
-		call = self.d9client.runAssessmenBundle(bundle)
+		call = self.d9client.runAssessmenBundle(bundle, outAsJson=True)
 		return call
 	
 	def fetchAllEntityStatus(self):
 		self.buildFetchList()
 		print('Process sync now...')
-		call = self.d9client.cloudAccountSyncNow(self.accountId, outAsJson=True)
+		self.d9client.cloudAccountSyncNow(self.accountId, outAsJson=True)
 		startedTime = timeFunc.utcnow()
 		print('Waiting for entity to be update...')
 		timeCount = 0
 		while not self.isFetchFinished():
-			apiEntityStatusList = self.d9client.getAllEntityFetchStatus(self.cloudAccountID)
-			print(apiEntityStatusList)
+			apiEntityStatusList = self.d9client.getAllEntityFetchStatus(self.accountId)
 			for apiEntityStatus in apiEntityStatusList:
 				if self.validateService(apiEntityStatus['entityType']):
 					isSuccessRun = self.isFetchUpdated(startedTime, apiEntityStatus['lastSuccessfulRun'])
@@ -200,6 +209,7 @@ class FetchEntityStatus(object):
 				break
 			print ('{}: Entities Updated: {}/{}'.format(timeCount, self.getFetchFinishedCount(), len(self.feachStatusList)))
 			time.sleep(FetchEntityStatus.RUN_INTERVALS)
+		print("running bundle...")
 		self.runAssessmentBundle()
 
 
@@ -209,7 +219,8 @@ if __name__ == '__main__':
 	parser.epilog = 'Example of use: {} {}'.format(__file__, useExample)
 	parser.add_argument('--apiKeyID', required=True, type=str)
 	parser.add_argument('--secretKey', required=True, type=str)
-	parser.add_argument('--cloudAccountID', required=True, type=str)
+	parser.add_argument('--externalAccountNumber', required=False, type=str)
+	parser.add_argument('--cloudAccountID', required=False, type=str)
 	parser.add_argument('--assessmentTemplateID', required=True, type=str)
 	parser.add_argument('--assessmentRegion', required=False, type=str)
 	parser.add_argument('--assessmentCloudAccountType', required=False, choices=['AWS', 'AZURE', 'GCP'])
