@@ -104,10 +104,14 @@ class FetchEntityStatus(object):
 		
 		apiDate, apiTime = apiDateTime.split('T')
 		apiYear, apiMonth, apiDay = apiDate.split('-')
-		apiHour, apiMinutes, apiSeconds = apiTime.split(':')
+		apiHour, apiMinutes, apiSecondsMilliseconds = apiTime.split(':')
 		
-		# datetime.datetime
-		apiDateTimeConverted = timeFunc(int(apiYear), int(apiMonth), int(apiDay), int(apiHour), int(apiMinutes), int(apiSeconds.split('.')[0]), 0, pytz.UTC)
+		if apiSecondsMilliseconds.split('.') == 1:
+			apiSeconds = apiSecondsMilliseconds.split('Z')[0]
+		else:
+			apiSeconds = apiSecondsMilliseconds.split('.')[0]
+			
+		apiDateTimeConverted = timeFunc(int(apiYear), int(apiMonth), int(apiDay), int(apiHour), int(apiMinutes), int(apiSeconds), 0, pytz.UTC)
 		
 		apiInSeconds = int(calendar.timegm(apiDateTimeConverted.utctimetuple()))
 		
