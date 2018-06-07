@@ -7,6 +7,9 @@ import uuid
 import argparse
 import json
 import sys
+import calendar
+import pytz
+
 
 class FetchEntityStatus(object):
 	EMPTY_DATE = '0001-01-01T00:00:00Z'
@@ -96,19 +99,21 @@ class FetchEntityStatus(object):
 			self.accountId = self.cloudAccountID
 			if not self.assessmentCloudAccountType:
 				sys.exit("cloudAccountID require using: --assessmentCloudAccountType")
-			
-		
-		
 	
-	def getDifTime(self, currentTime, inputTime):
-		inputFormatTime = ' '.join(inputTime.split('.')[0].split('T'))
-		inputTimeStamp = int(timeFunc.strptime(inputFormatTime, '%Y-%m-%d %H:%M:%S').strftime("%s"))
+	def getDeltaInMillisec(self, nowUtcTimeInEpoc, apiDateTime):
 		
-		currentFormatTime = currentTime.split('.')[0]
-		currentTimeStamp = int(timeFunc.strptime(currentFormatTime, '%Y-%m-%d %H:%M:%S').strftime("%s"))
+		apiDate, apiTime = apiDateTime.split('T')
+		apiYear, apiMonth, apiDay = apiDate.split('-')
+		apiHour, apiMinutes, apiSeconds = apiTime.split(':')
 		
-		diftime = inputTimeStamp - currentTimeStamp
-		return diftime
+		# datetime.datetime
+		apiDateTimeConverted = timeFunc(int(apiYear), int(apiMonth), int(apiDay), int(apiHour), int(apiMinutes), int(apiSeconds.split('.')[0]), 0, pytz.UTC)
+		
+		apiInSeconds = int(calendar.timegm(apiDateTimeConverted.utctimetuple()))
+		
+		deltaInMillisec = apiInSeconds - nowUtcTimeInEpoc
+		
+		return deltaInMillisec
 	
 	def validateService(self, service):
 		return True if service in FetchEntityStatus.SERVICES else False
@@ -164,11 +169,11 @@ class FetchEntityStatus(object):
 					unUpdatedList.append(entityObject['type'])
 		return unUpdatedList
 					
-	def isFetchUpdated(self, startedTime, runTime):
-		if runTime == FetchEntityStatus.EMPTY_DATE:
+	def isFetchUpdated(self, nowUtcTimeInEpoc, apiTime):
+		if apiTime == FetchEntityStatus.EMPTY_DATE:
 			return False
-		diferanceInMs = self.getDifTime(str(startedTime), runTime)
-		return True if diferanceInMs >= 0 else False
+		if self.getDeltaInMillisec(nowUtcTimeInEpoc, apiTime) > 0:
+			return True
 	
 	def runAssessmentBundle(self):
 		bundle = {
@@ -189,15 +194,16 @@ class FetchEntityStatus(object):
 		self.buildFetchList()
 		print('Process sync now...')
 		self.d9client.cloudAccountSyncNow(self.accountId, outAsJson=True)
-		startedTime = timeFunc.utcnow()
+		nowUTCTime = timeFunc.utcnow()
+		nowUtcTimeInEpoc = int(calendar.timegm(nowUTCTime.utctimetuple()))
 		print('Waiting for entity to be update...')
 		timeCount = 0
 		while not self.isFetchFinished():
 			apiEntityStatusList = self.d9client.getAllEntityFetchStatus(self.accountId)
 			for apiEntityStatus in apiEntityStatusList:
 				if self.validateService(apiEntityStatus['entityType']):
-					isSuccessRun = self.isFetchUpdated(startedTime, apiEntityStatus['lastSuccessfulRun'])
-					isFailedRun = self.isFetchUpdated(startedTime, apiEntityStatus['lastFailureRun'])
+					isSuccessRun = self.isFetchUpdated(nowUtcTimeInEpoc, apiEntityStatus['lastSuccessfulRun'])
+					isFailedRun = self.isFetchUpdated(nowUtcTimeInEpoc, apiEntityStatus['lastFailureRun'])
 					if isSuccessRun or isFailedRun:
 						self.updateFetchStatus(apiEntityStatus['entityType'], apiEntityStatus['region'])
 			timeCount += 1
