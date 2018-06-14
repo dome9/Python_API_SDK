@@ -1,6 +1,35 @@
 # Description
 The Tool run sync now and wait for all entities to be updates, then it wil run bundle assessment.
 
+**Entities support sync now:**
+
+AwsDynamoDb
+AwsEc2Images
+AwsInspector
+AwsIamServerCertificate
+AwsVirtualMfaDevices
+AwsKinesisStream
+AwsNetworkInterface
+AwsRoute53Domains
+AwsRoute53HostedZones
+AwsAcmCertificate
+AwsS3Bucket
+AwsCloudFrontDistribution
+AwsIamPasswordPolicy
+IamUsersFetchJob
+AwsIamUserInlinePolicies
+AwsIamUserAttachedPolicies
+AwsIamUserGroups
+IamRolesFetchJob
+AwsIamRoleAttachedPolicies
+AwsIamRoleInlinePolicies
+
+**Entities without sync now supported:
+IamCredentialReport
+IamGroups
+IamAccountSummary
+
+
 # Example
 
 **example to use AWS external account id:**
