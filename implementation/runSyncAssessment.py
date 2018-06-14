@@ -13,7 +13,7 @@ import pytz
 
 class FetchEntityStatus(object):
 	EMPTY_DATE = '0001-01-01T00:00:00Z'
-	RUN_TIME_OUT = 40
+	RUN_TIME_OUT = 15
 	RUN_INTERVALS = 60
 	SERVICES = [
 		"AzurePublicIP",
