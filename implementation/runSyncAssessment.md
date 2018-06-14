@@ -1,33 +1,73 @@
 # Description
-The Tool run sync now and wait for all entities to be updates, then it wil run bundle assessment.
+The Tool run sync now process, waiting to get status uodate for the suported entities in the list below and then it wil run bundle assessment.
 
 **Entities support sync now:**
 
-AwsDynamoDb
-AwsEc2Images
-AwsInspector
-AwsIamServerCertificate
-AwsVirtualMfaDevices
-AwsKinesisStream
-AwsNetworkInterface
-AwsRoute53Domains
-AwsRoute53HostedZones
-AwsAcmCertificate
-AwsS3Bucket
-AwsCloudFrontDistribution
-AwsIamPasswordPolicy
-IamUsersFetchJob
-AwsIamUserInlinePolicies
-AwsIamUserAttachedPolicies
-AwsIamUserGroups
-IamRolesFetchJob
-AwsIamRoleAttachedPolicies
-AwsIamRoleInlinePolicies
+* AwsDynamoDb
+* AwsEc2Images
+* AwsInspector
+* AwsIamServerCertificate
+* AwsVirtualMfaDevices
+* AwsKinesisStream
+* AwsNetworkInterface
+* AwsRoute53Domains
+* AwsRoute53HostedZones
+* AwsAcmCertificate
+* AwsS3Bucket
+* AwsCloudFrontDistribution
+* AwsIamPasswordPolicy
+* IamUsersFetchJob
+* AwsIamUserInlinePolicies
+* AwsIamUserAttachedPolicies
+* AwsIamUserGroups
+* IamRolesFetchJob
+* AwsIamRoleAttachedPolicies
+* AwsIamRoleInlinePolicies
 
 **Entities without sync now supported:
-IamCredentialReport
-IamGroups
-IamAccountSummary
+* AppLoadBalancer
+* AwsElastiCacheStatus
+* AwsInstance
+* AwsInternetGateway
+* AwsRouteTables
+* AwsSecurityGroup
+* AwsVpnGateway
+* CloudTrail
+* ConfigurationRecorders
+* DbInstance
+* DirectConnectConnection
+* DirectConnectVirtualInterface
+* Efs
+* Elb
+* IamAccountSummary
+* IamCredentialReport
+* IamGroups
+* IamPolicies
+* IamUser
+* Kms
+* KmsAlias
+* Lambda
+* LogGroups
+* MetricAlarms
+* Nacl
+* RedshiftCluster
+* Subnet
+* Vpc
+* VpcEndpoint
+* VpcFlowLogs
+* VpcPeeringConnection
+* WAFRegional
+* AzureLoadBalancer
+* AzureNetworkInterface
+* AzurePublicIP
+* AzureResourceGroup
+* AzureSubnet
+* AzureVirtualMachine
+* AzureVirtualNetwork
+* GoogleCloudFirewall
+* GoogleCloudInstance
+* GoogleCloudNetwork
+* GoogleCloudSubnet
 
 
 # Example
