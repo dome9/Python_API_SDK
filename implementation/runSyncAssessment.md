@@ -24,7 +24,7 @@ The Tool run sync now process, waiting to get status uodate for the suported ent
 * AwsIamRoleAttachedPolicies
 * AwsIamRoleInlinePolicies
 
-**Entities without sync now supported:
+**Entities without sync now supported**:
 * AppLoadBalancer
 * AwsElastiCacheStatus
 * AwsInstance
