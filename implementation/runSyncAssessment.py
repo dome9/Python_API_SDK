@@ -106,7 +106,7 @@ class FetchEntityStatus(object):
 		apiYear, apiMonth, apiDay = apiDate.split('-')
 		apiHour, apiMinutes, apiSecondsMilliseconds = apiTime.split(':')
 		
-		if apiSecondsMilliseconds.split('.') == 1:
+		if len(apiSecondsMilliseconds.split('.')) == 1:
 			apiSeconds = apiSecondsMilliseconds.split('Z')[0]
 		else:
 			apiSeconds = apiSecondsMilliseconds.split('.')[0]
