@@ -16,18 +16,17 @@ Table of Contents
 * [Not Supported entities](#not-supported-entities)
 
 # Tool Description
-This runs an assessment bundle after first checking that all entities are up-to-date.
+This runs an assessment bundle after first checking that all cloud environment entities are up-to-date.
 
 ## Script Flow
-- The script validates at runtime that all entities are up-to-date.
-- The script runs SyncNow for each of the supported entities, to check it is up-to-date.
-- It waits 0 minutes for each entity to have the most up to date data.
-- After checking the entities are up-to-date, it rusn the compliance assessments for the specificied bundle ID, for the given cloud account.
+- The script validates at runtime that all entities are up-to-date. It uses  SyncNow for each of the entities that support SyncNow, to check they are up-to-date.
+- It waits 15 minutes for the entities that don't support SyncNow to be updated.
+- After checking the entities are up-to-date, it runs the compliance assessments for the specified bundle ID, for the given cloud account.
 
 # Setup Steps
 ## Prerequisites 
 
-- Dome9 API keyID and secret
+- Dome9 APIkeyID and secret
 - The script files should be in the same folder as the Dome9 Python_API_SDK 
 - Python 2.7 or later
 - Python modules:
@@ -58,6 +57,7 @@ runSyncAssessment.py --assessmentTemplateID -4 --externalAccountNumber 123456789
 runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --assessmentCloudAccountType AWS --secretKey {secretKey} --apiKeyID {apiKeyID}
 
 # Supported entities
+These entities support SyncNow
 ## AWS Entities
 
 - DynamoDb (SyncNow supported)
@@ -132,7 +132,7 @@ runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --asse
 - GoogleCloudSubnet
 
 # Unsupported entities
-These entities, with a fetch time greater than 20 minutes, are not supported.
+These entities, with a fetch time greater than 20 minutes, do not support SyncNow.
 
 - AzureApplicationGateway
 - AzureSqlServer

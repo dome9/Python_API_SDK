@@ -4,22 +4,23 @@ Dome9 Api Client - Python SDK
 
 Author - Udi-Yehuda Tamar [devops@dome9.com](mailto:devops@dome9.com) 
 
+This SDK implements a Python wrapper for the Dome9 API V2.
 
 # Classes
 
 There are 2 API classes 
 
-Dome9ApiSDK - straight forward backend implementation 
+Dome9ApiSDK - the backend implementation, used by the client class.
 
 Dome9ApiClient - inherit from Dome9ApiSDK class + custom client methods 
 
-Both classes are implementing the same constructor.
+Both classes implement the same constructor.
 
-# Prerequisite 
+# Prerequisites
 
-* Dome9 API keyID and secret 
+* Dome9 API APIkey and secret 
 
-* Installed python >= 2.7 
+* Python v2.7 or later
 
 * Python modules:
 
@@ -31,23 +32,21 @@ Both classes are implementing the same constructor.
 
 # Local imports 
 
-Currently we yet implemented python setup module for the SDK , so in order to use it the user must reform relative import of the module file.
+USave the Python SDK modules in the same folder as your Python modules.
 
-Current SDK only supports Dome9 API V2.
+Currently, the SDK supports only Dome9 API V2.
 
 # Instance Params
 
-There are 2 mandatory params
+There are two mandatory params
 
-apiKeyID - dome9 Api key ID
+apiKeyID - Dome9 API key ID
 
-apiSecret - dome9 secret 
+apiSecret - Dome9 secret 
 
-# Instance Sample
+# Instance Example
 
-To create instanse just provide the requested params use the instance var to expose all the api methods 
-
-In the following example we are setting sa_east_1 to ReadOnly protection mode , to see more options check the methods signatures  
+To create an instance of the client class:
 
 <table>
   <tr>
@@ -62,32 +61,35 @@ call = d9client.setCloudRegionsProtectedMode(ID='056162705707', protectionMode='
 print(call)</td>
   </tr>
 </table>
+In this example we are setting the region sa_east_1 to ReadOnly protection mode.
 
-# Dome9 API  
+# Dome9 API Methods
 
 ## General guidelines 
 
-* All methods by default are returning python object  or none value 
+* All methods by default return a python object or no value 
 
 * outAsJson(bool) - optional param prints json (as string stdout) to the shell’s console. 
 
 
 ## Dome9 Tools
 
+These methods use the SDK methods (below) to perform complex operations
+
 ### ** Method setCloudRegionsProtectedMode
 
-Task: set cloud region protection mode , providing regions param will effect the requested protection mode , by default method runs on all user’s regions.
+Task: set  protection mode for a cloud region. If regions are specified, it will apply to these regions, otherwise on all the user’s regions.
 
 Params: 
 
-Mandatory: ID(str), protectionMode(str) select one from: 'ReadOnly', 'FullManage', 'Reset'
+Mandatory: ID(str), protectionMode(str) select from: 'ReadOnly', 'FullManage', 'Reset'
 
 Optional: regions (list[]) 
 
 
 ### ** Method setCloudSecurityGroupsProtectionModeOfVpc
 
-Task: set protection mode of all attched security groups in a spesific VPC
+Task: set protection mode of all attached security groups in a specific VPC
 
 Params: 
 
@@ -98,7 +100,7 @@ Optional: outAsJson
 
 ### ** Method setCloudSecurityGroupsProtectionModeInRegion
 
-Task: set protection mode for all security groups in spesific region
+Task: set protection mode for all security groups in specific region
 
 Params: 
 
@@ -109,27 +111,27 @@ Optional:
 
 ### ** Method getCloudSecurityGroupByVpcName
 
-Task: gets sec groups attached to a vpc 
+Task: gets security groups attached to a VPC 
 
 Params: 
 
- Mandatory: vpcName(str)
+Mandatory: vpcName(str)
  
 Optional: 
 
 ### ** Method getAllCloudSecurityGroupsInRegion
 
-Task: gets all sec groups in a region 
+Task: get all security groups in a region 
 
 Params: 
 
- Mandatory: region(str), names(bool)[output list of names]
+Mandatory: region(str), names(bool)[output list of names]
  
 Optional: 
 
 ### ** Method getAllSecurityGroupIDsOfVpc
 
-Task: gets all sec group IDs of a specific VPC
+Task: get all security group IDs for a specific VPC
 
 Params: 
 
@@ -158,7 +160,7 @@ Optional: outAsJson
 
 ### ** Method getCloudAccountID
 
-Task: Return specific cloud account 
+Task: Return a specific cloud account 
 
 Params: 
 
@@ -188,7 +190,7 @@ Optional: outAsJson
 
 ### ** Method getCloudTrail
 
-Task: Return cloud trail info 
+Task: Return CloudTrail info 
 
 Params: 
 
@@ -196,31 +198,31 @@ Optional: outAsJson
 
 ### ** Method getAwsSecurityGroups
 
-Task: gets all aws sec groups 
+Task: get all AWS security groups 
 
 Params: 
 
- Mandatory: 
+Mandatory: 
  
 Optional: outAsJson
 
 ### ** Method getAwsSecurityGroup
 
-Task: gets one aws sec group
+Task: get one AWS security group
 
 Params: 
 
- Mandatory: ID(str)
+Mandatory: ID(str)
  
 Optional: outAsJson
 
 ### ** Method setCloudSecurityGroupProtectionMode
 
-Task: set single sg protection mode 
+Task: set a single security group protection mode 
 
 Params: 
 
- Mandatory: ID(str), protectionMode(str)
+Mandatory: ID(str), protectionMode(str)
  
 Optional: outAsJson
 
