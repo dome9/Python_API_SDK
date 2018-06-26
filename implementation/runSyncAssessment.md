@@ -16,21 +16,19 @@ Table of Contents
 * [Not Supported entities](#not-supported-entities)
 
 # Tool Description
-This tool verifies that an assessment run will be performed after the entites are most up to date.
-The tool run SyncNow process, waiting for an answer for every supported entity and then checks all the other supported entities to be mostly up to date prior running an assessment.
+This runs an assessment bundle after first checking that all cloud environment entities are up-to-date.
 
 ## Script Flow
-- The script is validating on runtime the up to date entities.
-- Running SyncNow for all the supported entities to have the most up to date data.
-- Waiting for 0 minutes to have the most up to date data.
-- Running compliance assessments with the given bundle ID for the given cloud account.
+- The script validates at runtime that all entities are up-to-date. It uses  SyncNow for each of the entities that support SyncNow, to check they are up-to-date.
+- It waits 15 minutes for the entities that don't support SyncNow to be updated.
+- After checking the entities are up-to-date, it runs the compliance assessments for the specified bundle ID, for the given cloud account.
 
 # Setup Steps
 ## Prerequisites 
 
-- Dome9 API keyID and secret
-- Script location need to be in the same folder where the Dome9 Python_API_SDK exist
-- Installed python >= 2.7 
+- Dome9 APIkeyID and secret
+- The script files should be in the same folder as the Dome9 Python_API_SDK 
+- Python 2.7 or later
 - Python modules:
     - time 
     - datetime
@@ -41,24 +39,25 @@ The tool run SyncNow process, waiting for an answer for every supported entity a
 
 ## Parameters
 
-* apiKeyID (String): Dome9 API key
-* secretKey (String): Dome9 secret key
-* cloudAccountID (String): vendor cloud account id
-* externalAccountNumber (String): AWS cloud account id
-* assessmentTemplateID (integer): Assessment bundle id
-* assessmentRegion (String, optional): Vendor region
-* assessmentCloudAccountType (String, optional): Allowed paramaters:  'AWS', 'AZURE', 'GCP'
+* **apiKeyID** (String): Dome9 API key
+* **secretKey** (String): Dome9 secret key
+* **cloudAccountID** (String): vendor cloud account id
+* **externalAccountNumber** (String): AWS cloud account id
+* **assessmentTemplateID** (integer): Assessment bundle id
+* **assessmentRegion** (String, optional): Vendor region
+* **assessmentCloudAccountType** (String, optional): Cloud provider ('AWS', 'AZURE', 'GCP')
 
 
 # Usage examples
 
-**example to use AWS external account id:**
+**example to use an AWS external account id:**
 runSyncAssessment.py --assessmentTemplateID -4 --externalAccountNumber 123456789 --secretKey {secretKey} --apiKeyID {apiKeyID}
 
-**example to use any vendor with dome9 cloud account id:**
+**example to use for any cloud vendor, with a Dome9 cloud account id:**
 runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --assessmentCloudAccountType AWS --secretKey {secretKey} --apiKeyID {apiKeyID}
 
 # Supported entities
+These entities support SyncNow
 ## AWS Entities
 
 - DynamoDb (SyncNow supported)
@@ -132,8 +131,8 @@ runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --asse
 - GoogleCloudNetwork
 - GoogleCloudSubnet
 
-# Not Supported entities
-Not supported entities related to all of the entities which their fetching time is higher then 20 minutes.
+# Unsupported entities
+These entities, with a fetch time greater than 20 minutes, do not support SyncNow.
 
 - AzureApplicationGateway
 - AzureSqlServer
