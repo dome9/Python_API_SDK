@@ -147,3 +147,11 @@ These entities, with a fetch time greater than 20 minutes are not covered by thi
 - AwsVolumes
 - IamCredentialReport
 - Aws Tags on all supported entities
+
+
+# One last thing...
+I find it useful to review the entities fetch status in a CSV format using Excel.<br/> 
+For this I use the `jq` utility and usually pipe it to a file (or to `grep`)
+```bash
+curl -u <Dome9API V2 Api Key ID>:<api secret> https://api.dome9.com/v2/EntityFetchStatus?externalAccountNumber=123456789 | jq -r '(map(keys) | add | unique) as $cols | map(. as $row | $cols | map($row[.])) as $rows | $cols, $rows[] | @csv'
+```
