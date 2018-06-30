@@ -16,12 +16,14 @@ Table of Contents
 * [Not Supported entities](#not-supported-entities)
 
 # Tool Description
-This runs an assessment bundle after first checking that all cloud environment entities are up-to-date.
+This is a tool/ sample/ starting point that demonstrates a full workflow for ad-hoc assessment while guaranteeing fresh data in Dome9 caches. It is designed to be integrated in CI/CD pipelines where the Dome9 system is expected to assess a new (even ephemeral) environment or some new changes to production env.
+
 
 ## Script Flow
-- The script validates at runtime that all entities are up-to-date. It uses  SyncNow for each of the entities that support SyncNow, to check they are up-to-date.
-- It waits 15 minutes for the entities that don't support SyncNow to be updated.
-- After checking the entities are up-to-date, it runs the compliance assessments for the specified bundle ID, for the given cloud account.
+- The script starts with a Dome9 API 'SyncNow' command which instructs the system to start fetching new data from the cloud provider. Note that not all cloud entities respect this command as of now. See the list below for additonal details.
+- It then uses the new 'EntityFetchStatus' API to reason about the fetch-status of the various entities. The scripts polls this API until all desired entity types (configurable types) were fetched later than the script's start time.
+- The script can wait up to *RUN_TIME_OUT* minutes (default 15). If there are entities that were not updated yet it will print them to the console (as the script can reason about entities that do not yet support SyncNow this can possibly occur)
+- After done waiting, the script will use the assessment API to perfrom ad-hoc assessment for the desired cloud account and policy (bundle).
 
 # Setup Steps
 ## Prerequisites 
@@ -41,8 +43,8 @@ This runs an assessment bundle after first checking that all cloud environment e
 
 * **apiKeyID** (String): Dome9 API key
 * **secretKey** (String): Dome9 secret key
-* **cloudAccountID** (String): vendor cloud account id
-* **externalAccountNumber** (String): AWS cloud account id
+* **cloudAccountID** (String): cloud account id (Dome9 internal ID) - must use this **OR** the *externalAccountNumber*
+* **externalAccountNumber** (String): AWS cloud account number - must use this parameter **or** the *cloudAccountID*
 * **assessmentTemplateID** (integer): Assessment bundle id
 * **assessmentRegion** (String, optional): Vendor region
 * **assessmentCloudAccountType** (String, optional): Cloud provider ('AWS', 'AZURE', 'GCP')
@@ -57,7 +59,9 @@ runSyncAssessment.py --assessmentTemplateID -4 --externalAccountNumber 123456789
 runSyncAssessment.py --assessmentTemplateID -4 --cloudAccountID 123456789 --assessmentCloudAccountType AWS --secretKey {secretKey} --apiKeyID {apiKeyID}
 
 # Supported entities
-These entities support SyncNow
+Note the entity types that supports 'SyncNow' capability. 
+Please contact our support for additional entity types that you would like us to prioritize (adding SyncNow support for them)
+
 ## AWS Entities
 
 - DynamoDb (SyncNow supported)
@@ -131,8 +135,8 @@ These entities support SyncNow
 - GoogleCloudNetwork
 - GoogleCloudSubnet
 
-# Unsupported entities
-These entities, with a fetch time greater than 20 minutes, do not support SyncNow.
+# Unsupported entities by this script
+These entities, with a fetch time greater than 20 minutes are not covered by this script (meaning the script is not waiting / checking the status of these entities)
 
 - AzureApplicationGateway
 - AzureSqlServer
@@ -140,6 +144,6 @@ These entities, with a fetch time greater than 20 minutes, do not support SyncNo
 - AzureRedis
 - AzureKeyVault
 - AwsEcs
-- AwsVolumesFetchJob
+- AwsVolumes
 - IamCredentialReport
 - Aws Tags on all supported entities
