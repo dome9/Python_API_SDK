@@ -81,31 +81,29 @@ Please contact our support for additional entity types that you would like us to
 - IamUserAttachedPolicies (SyncNow supported)
 - IamUserGroups (SyncNow supported)
 - IamRole (SyncNow supported)
-- IamRoleAttachedPolicies (SyncNow supported)
+- IamRoleAttachedPolices (SyncNow supported)
 - IamRoleInlinePolicies (SyncNow supported)
+- IamPolicies  (SyncNow supported)
 - VPNConnection (SyncNow supported)
+- Lambda (SyncNow supported)
 - WAFRegional
 - AppLoadBalancer
-- ElastiCacheStatus
+- AwsElastiCacheStatus
 - AwsInstance
-- InternetGateway
 - RouteTables
 - AwsSecurityGroup
-- VpnGateway
+- AwsVpnGateway
 - CloudTrail
 - ConfigurationRecorders
 - DbInstance
 - DirectConnectConnection
 - DirectConnectVirtualInterface
 - Efs
+- IamGroups
 - Elb
 - IamAccountSummary
-- IamGroups
-- IamPolicies
-- IamUser
 - Kms
 - KmsAlias
-- Lambda
 - LogGroups
 - MetricAlarms
 - Nacl
@@ -116,7 +114,6 @@ Please contact our support for additional entity types that you would like us to
 - VpcFlowLogs
 - VpcPeeringConnection
 
-- S3Bucket (SyncNow supported, Yet reasoning about update time will be added soon)
 
 
 
@@ -140,6 +137,7 @@ Please contact our support for additional entity types that you would like us to
 # Unsupported entities by this script
 These entities, with a fetch time greater than 20 minutes are not covered by this script (meaning the script is not waiting / checking the status of these entities)
 
+- S3Bucket (SyncNow supported, Yet reasoning about update time will be added soon)
 - AzureApplicationGateway
 - AzureSqlServer
 - AzureStorage
