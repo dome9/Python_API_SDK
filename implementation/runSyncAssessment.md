@@ -64,34 +64,33 @@ Please contact our support for additional entity types that you would like us to
 
 ## AWS Entities
 
-- DynamoDb (SyncNow supported)
+- DynamoDbTable (SyncNow supported)
 - Ec2Images (SyncNow supported)
 - Inspector (SyncNow supported)
 - IamServerCertificate (SyncNow supported)
 - VirtualMfaDevices (SyncNow supported)
-- KinesisStream (SyncNow supported)
+- Kinesis (SyncNow supported)
 - NetworkInterface (SyncNow supported)
-- Route53Domains (SyncNow supported)
-- Route53HostedZones (SyncNow supported)
+- Route53Domain (SyncNow supported)
+- Route53HostedZone (SyncNow supported)
 - AcmCertificate (SyncNow supported)
-- S3Bucket (SyncNow supported)
-- CloudFrontDistribution (SyncNow supported)
+- CloudFront (SyncNow supported)
 - IamPasswordPolicy (SyncNow supported)
-- IamUsers (SyncNow supported)
+- IamUser (SyncNow supported)
 - IamUserInlinePolicies (SyncNow supported)
 - IamUserAttachedPolicies (SyncNow supported)
 - IamUserGroups (SyncNow supported)
-- RolesFetchJob (SyncNow supported)
+- IamRole (SyncNow supported)
 - IamRoleAttachedPolicies (SyncNow supported)
 - IamRoleInlinePolicies (SyncNow supported)
 - VPNConnection (SyncNow supported)
 - WAFRegional (SyncNow supported)
 - AppLoadBalancer
 - ElastiCacheStatus
-- Instance
+- AwsInstance
 - InternetGateway
 - RouteTables
-- SecurityGroup
+- AwsSecurityGroup
 - VpnGateway
 - CloudTrail
 - ConfigurationRecorders
@@ -116,6 +115,9 @@ Please contact our support for additional entity types that you would like us to
 - VpcEndpoint
 - VpcFlowLogs
 - VpcPeeringConnection
+
+- S3Bucket (SyncNow supported, Yet reasoning about update time will be added soon)
+
 
 
 ## Azure Entities
