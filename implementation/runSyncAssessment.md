@@ -85,7 +85,7 @@ Please contact our support for additional entity types that you would like us to
 - IamRoleAttachedPolicies (SyncNow supported)
 - IamRoleInlinePolicies (SyncNow supported)
 - VPNConnection (SyncNow supported)
-- WAFRegional (SyncNow supported)
+- WAFRegional
 - AppLoadBalancer
 - ElastiCacheStatus
 - Instance
