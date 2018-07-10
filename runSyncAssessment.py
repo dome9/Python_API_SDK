@@ -36,9 +36,7 @@ class FetchEntityStatus(object):
 		"IamRole",
 		"IamRoleAttachedPolices",
 		"IamRoleInlinePolicies",
-		"IamPolicies",
 		"VPNConnection",
-		"AwsInstance",
 		"AwsSecurityGroup",
 		"Lambda"
 	]
@@ -185,7 +183,7 @@ class FetchEntityStatus(object):
 
 			time.sleep(FetchEntityStatus.RUN_INTERVALS)
 		print("running bundle...")
-		self.runAssessmentBundle()
+		#self.runAssessmentBundle()
 
 
 if __name__ == '__main__':

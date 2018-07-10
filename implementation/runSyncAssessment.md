@@ -82,8 +82,7 @@ Please contact our support for additional entity types that you would like us to
 - IamUserGroups (SyncNow supported)
 - IamRole (SyncNow supported)
 - IamRoleAttachedPolices (SyncNow supported)
-- IamRoleInlinePolicies (SyncNow supported)
-- IamPolicies  (SyncNow supported)
+- IamRoleInlinePolicies (SyncNow supported) 
 - VPNConnection (SyncNow supported)
 - Lambda (SyncNow supported)
 - WAFRegional
@@ -100,6 +99,7 @@ Please contact our support for additional entity types that you would like us to
 - DirectConnectVirtualInterface
 - Efs
 - IamGroups
+- IamPolicies 
 - Elb
 - IamAccountSummary
 - Kms
