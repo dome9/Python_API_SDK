@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 import json
 import requests
 from requests import ConnectionError, auth
-import urlparse
+import urllib.parse
 
 class Dome9ApiSDK(object):
 	REGION_PROTECTION_MODES = ['FullManage', 'ReadOnly', 'Reset']
@@ -40,7 +44,7 @@ class Dome9ApiSDK(object):
 		res = None
 		url = None
 		try:
-			url = urlparse.urljoin(self.baseAddress, route)
+			url = urllib.parse.urljoin(self.baseAddress, route)
 			if method == 'get':
 				res = requests.get(url=url, params=payload, headers=self.restHeaders, auth=self.clientAuth)
 

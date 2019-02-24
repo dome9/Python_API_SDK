@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
+from builtins import str
+from builtins import object
 from dome9ApiV2Py import Dome9ApiClient
 import time
 import datetime
@@ -88,7 +90,7 @@ class FetchEntityStatus(object):
 	
 	def isFetchFinished(self):
 		for entity in self.feachStatusList:
-			for entityID, entityObject in entity.iteritems():
+			for entityID, entityObject in entity.items():
 				if not entityObject['isUpdated']:
 					return False
 		return True
@@ -96,7 +98,7 @@ class FetchEntityStatus(object):
 	def getFetchFinishedCount(self):
 		feachCount = 0
 		for entity in self.feachStatusList:
-			for entityID, entityObject in entity.iteritems():
+			for entityID, entityObject in entity.items():
 				if entityObject['isUpdated']:
 					feachCount += 1
 		return feachCount
@@ -124,7 +126,7 @@ class FetchEntityStatus(object):
 		if not region:
 			region = FetchEntityStatus.NONE_REGION_NAME
 		for entity in self.feachStatusList:
-			for entityObjectID, entityObject in entity.iteritems():
+			for entityObjectID, entityObject in entity.items():
 				entityID = '{}-{}'.format(entityName, region)
 				if entityObjectID == entityID:
 					entityObject['isUpdated'] = True
@@ -132,7 +134,7 @@ class FetchEntityStatus(object):
 	def getUnUpdatedEntities(self):
 		unUpdatedList = []
 		for entity in self.feachStatusList:
-			for entityObjectID, entityObject in entity.iteritems():
+			for entityObjectID, entityObject in entity.items():
 				if not entityObject['isUpdated'] and not entityObject['type'] in unUpdatedList:
 					unUpdatedList.append(entityObject['type'])
 		return unUpdatedList
