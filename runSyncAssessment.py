@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 from dome9ApiV2Py import Dome9ApiClient
 import time
 import datetime
