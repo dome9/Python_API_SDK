@@ -25,22 +25,22 @@ class Dome9ApiSDK(object):
             raise Exception('Cannot create api client instance without keyID and secret!')
 
 # System methods
-    def get(self, route, payload=None):
-        return self.request('get', route, payload)
+    def _get(self, route, payload=None):
+        return self._request('get', route, payload)
 
-    def post(self, route, payload=None):
-        return self.request('post', route, payload)
+    def _post(self, route, payload=None):
+        return self._request('post', route, payload)
 
-    def patch(self, route, payload=None):
-        return self.request('patch', route, payload)
+    def _patch(self, route, payload=None):
+        return self._request('patch', route, payload)
 
-    def put(self, route, payload=None):
-        return self.request('put', route, payload)
+    def _put(self, route, payload=None):
+        return self._request('put', route, payload)
 
-    def delete(self, route, payload=None):
-        return self.request('delete', route, payload)
+    def _delete(self, route, payload=None):
+        return self._request('delete', route, payload)
 
-    def request(self, method, route, payload=None, isV2=True):
+    def _request(self, method, route, payload=None, isV2=True):
         res = None
         url = None
         try:
@@ -82,7 +82,7 @@ class Dome9ApiSDK(object):
                 'code': res.status_code,
                 'message': res.reason,
                 'content': res.content
-            }
+                }
 
         if err:
             raise Exception(err)
@@ -90,19 +90,19 @@ class Dome9ApiSDK(object):
 
     # Dome9 Methods
     def getAllUsers(self, outAsJson=False):
-        apiCall = self.get(route='user')
+        apiCall = self._get(route='user')
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
     def getCloudAccounts(self, outAsJson=False):
-        apiCall = self.get(route='CloudAccounts')
+        apiCall = self._get(route='CloudAccounts')
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
     def getCloudAccountID(self, ID, outAsJson=False):
-        apiCall = self.get(route='CloudAccounts/{}'.format(ID))
+        apiCall = self._get(route='CloudAccounts/{}'.format(ID))
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
@@ -115,38 +115,38 @@ class Dome9ApiSDK(object):
         return apiCall
 
     def updateCloudAccountID(self, ID, data, outAsJson):
-        apiCall = self.patch(route='CloudAccounts/{}'.format(ID), payload=data)
+        apiCall = self._patch(route='CloudAccounts/{}'.format(ID), payload=data)
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
     def getCloudTrail(self, outAsJson):
-        apiCall = self.get(route='CloudTrail')
+        apiCall = self._get(route='CloudTrail')
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
     def getAwsSecurityGroups(self, outAsJson=False):
-        apiCall = self.get(route='view/awssecuritygroup/index')
+        apiCall = self._get(route='view/awssecuritygroup/index')
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
     def getCloudSecurityGroup(self, ID, outAsJson=False):
-        apiCall = self.get(route='cloudsecuritygroup/{}'.format(ID))
+        apiCall = self._get(route='cloudsecuritygroup/{}'.format(ID))
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
     def getAllEntityFetchStatus(self, ID, outAsJson=False):
-        apiCall = self.get(route='EntityFetchStatus?cloudAccountId={}'.format(ID))
+        apiCall = self._get(route='EntityFetchStatus?cloudAccountId={}'.format(ID))
 
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
     def cloudAccountSyncNow(self, ID, outAsJson=False):
-        apiCall = self.post(route='cloudaccounts/{}/SyncNow'.format(ID))
+        apiCall = self._post(route='cloudaccounts/{}/SyncNow'.format(ID))
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
@@ -155,21 +155,20 @@ class Dome9ApiSDK(object):
         if protectionMode not in Dome9ApiSDK.SEC_GRP_PROTECTION_MODES:
             raise ValueError('Valid modes are: {}'.format(Dome9ApiSDK.SEC_GRP_PROTECTION_MODES))
 
-        data = json.dumps({ 'protectionMode': protectionMode })
+        data = json.dumps({'protectionMode': protectionMode})
         route = 'cloudsecuritygroup/{}/protection-mode'.format(ID)
-        apiCall = self.post(route=route, payload=data)
+        apiCall = self._post(route=route, payload=data)
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
 
-    def runAssessmenBundle(self, assReq, outAsJson=False): # assessmentRequest
+    def runAssessmenBundle(self, assReq, outAsJson=False):  # assessmentRequest
         data = json.dumps(assReq)
         route = 'assessment/bundleV2'
-        apiCall = self.post(route=route, payload=data)
+        apiCall = self._post(route=route, payload=data)
         if outAsJson:
             print(json.dumps(apiCall))
         return apiCall
-
 
 
 class Dome9ApiClient(Dome9ApiSDK):
@@ -200,10 +199,10 @@ class Dome9ApiClient(Dome9ApiSDK):
             data = json.dumps(
                 {'externalAccountNumber': ID, 'data': {'region': region, 'newGroupBehavior': protectionMode}})
             print('updating data: {}'.format(data))
-            self.put(route='cloudaccounts/region-conf', payload=data)
+            self._put(route='cloudaccounts/region-conf', payload=data)
 
     def setCloudSecurityGroupsProtectionModeInRegion(self, region, protectionMode):
-            secGrpsRegion = self.getCloudSecurityGroupsInRegion(region=region)
+        secGrpsRegion = self.getCloudSecurityGroupsInRegion(region=region)
         if not secGrpsRegion:
             raise ValueError('got 0 security groups!')
         for secGrpID in secGrpsRegion:
