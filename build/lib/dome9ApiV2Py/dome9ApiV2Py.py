@@ -109,6 +109,86 @@ class Dome9ApiSDK(object):
 			print(json.dumps(apiCall))
 		return apiCall
 
+	def getRoles(self, outAsJson=False):
+		apiCall = self.get(route='role')
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+
+	def onBoardingAwsAccount(self,arn, secret, fullProtection=False, allowReadOnly=True, name=None, outAsJson=False):
+
+		data = {
+				"name":name,
+				"credentials":{
+					"arn":arn,
+					"secret":secret,
+					"type":"RoleBased"
+				},
+				"fullProtection":fullProtection,
+				"allowReadOnly": allowReadOnly
+				}
+
+		route = 'CloudAccounts'
+		apiCall = self.post(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
+	def onBoardingAzureAccount(self, subscriptionID, tenantID, clientID, clientPassword, name=None, operationMode='Read', outAsJson=False):
+
+		data = {
+			"name": name,
+			"subscriptionId": subscriptionID,
+			"tenantId": tenantID,
+			"credentials": {
+				"clientId": clientID,
+				"clientPassword": clientPassword
+			},
+			"operationMode": operationMode,
+		}
+
+		route = 'AzureCloudAccount'
+		apiCall = self.post(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
+	def updateOrganizationalUnitForCloudAccount(self,cloudAccountID, organizationalUnitID=None, outAsJson=False):
+
+		data = {"organizationalUnitId": organizationalUnitID}
+
+		route = 'cloudaccounts/{}/organizationalUnit'.format(cloudAccountID)
+		apiCall = self.put(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
+	def updateRoleByID(self, roleID, roleName, permissions, outAsJson=False):
+
+		data = {
+					"name": roleName,
+					"permissions": permissions
+				}
+
+		route = 'Role/{}'.format(roleID)
+		apiCall = self.put(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
+	def getRoleByID(self, roleID, outAsJson=False):
+
+		route = 'Role/{}'.format(roleID)
+		apiCall = self.get(route=route)
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
 	def updateCloudAccountID(self, ID, data, outAsJson):
 		apiCall = self.patch(route='CloudAccounts/{}'.format(ID), payload=data)
 		if outAsJson:
@@ -117,6 +197,12 @@ class Dome9ApiSDK(object):
 
 	def getCloudTrail(self, outAsJson):
 		apiCall = self.get(route='CloudTrail')
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+
+	def getFlatOrganizationalUnits(self, outAsJson):
+		apiCall = self.get(route='organizationalunit/GetFlatOrganizationalUnits')
 		if outAsJson:
 			print(json.dumps(apiCall))
 		return apiCall
