@@ -1,7 +1,8 @@
-from dome9ApiV2Py import Dome9ApiClient
+#!/usr/bin/env python
 import argparse
 import uuid
 import sys
+from dome9ApiV2Py import Dome9ApiClient
 
 class OnBoardingCloudAccount(object):
 	VENDOR_TYPES = ['aws', 'azure']
