@@ -32,8 +32,8 @@ This script does the following:
 * **cloudVendorType** (String): type of cloud account vendor: *aws, azure*
 * **awsRoleArn** (String): the ARN of the Dome9-Connect role in your AWS account
 * **awsRoleExternalID** (String): the external ID value used to create the role in your AWS account
-* **awsAllowReadOnly** (String, optional): set to True for *Read-Only*, and False for *Full Protection*; default is True
-* **awsFullProtection** (String, optional): set to True to set the Security Groups in the account to *Full-Protection* in the course of onboarding, or False to leave them unchanged; default is False
+* **awsAllowReadOnly** (Switch, optional): switch parameter, use it for Read-Only, don\'t use it for Full Protection
+* **awsFullProtection** (Switch, optional): switch parameter, use it for to set the Security Groups in the account to Full-Protection in the course of onboarding, or don\'t use it to leave them unchanged
 * **azureSubscriptionID** (String, optional): Azure subscriptionID
 * **azureActiveDirectoryID** (String, optional): Azure azureActiveDirectoryID\\tenantID
 * **azureApplicationID** (String, optional): Azure azureApplicationID\clientID
