@@ -41,8 +41,8 @@ This script does the following:
 * azureOperationMode** (String, optional): Azure operationMode, *Read* or *Manage*; default is Read, 
 * **dome9OuID** (String, optional): Organization Unit ID to which cloud account will be attached
 * **dome9AccountName** (String, optional): accountName account display name on Dome9 console, default is *account-randomString*
-* **dome9AdminRoleID** (String, optional): Dome9 admin role ID to attach to the account
-* **dome9ViewRoleID** (String, optional): Dome9 view (read) role ID to attach to the account
+* **dome9AdminRoleID** (String, optional): Dome9 admin role ID to attach to the account (to obtain this ID, use the [Organization Unit method](https://api-v2-docs.dome9.com/#Dome9-API-OrganizationalUnit) in the Dome9 REST API)
+* **dome9ViewRoleID** (String, optional): Dome9 view (read) role ID to attach to the account (to obtain this ID, use the [Role method](https://api-v2-docs.dome9.com/#Dome9-API-Role) in the Dome9 REST API)
 
 
 # Usage examples
