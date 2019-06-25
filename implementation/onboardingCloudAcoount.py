@@ -10,7 +10,7 @@ class OnBoardingCloudAccount(object):
 	AWS_ALLOW_READONLY = [True, False]
 	AWS_FULL_PROTECTION = [True, False]
 	AWS_SRL = '1'
-	AZURE_OPERATION_MODE = ['READ', 'Manage']
+	AZURE_OPERATION_MODE = ['Read', 'Manage']
 	AZURE_SRL = '7'
 
 	def __init__(self, args):
