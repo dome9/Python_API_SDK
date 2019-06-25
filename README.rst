@@ -32,7 +32,7 @@ Both classes implement the same constructor.
 
 # Local imports 
 
-Install the api wit pip: # pip install .
+USave the Python SDK modules in the same folder as your Python modules.
 
 Currently, the SDK supports only Dome9 API V2.
 
