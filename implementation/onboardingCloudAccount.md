@@ -32,8 +32,8 @@ the account - Attach the admin role to the account
     AWS account
   - **awsRoleExternalID** (String, optional): the external ID value used to create
     the role in your AWS account
-  - * **awsAllowReadOnly** (Switch, optional): switch parameter, use it for Read-Only, don\'t use it for Full Protection
-  - * **awsFullProtection** (Switch, optional): switch parameter, use it for to set the Security Groups in the account to Full-Protection in the course of onboarding, or don\'t use it to leave them unchanged
+  - **awsAllowReadOnly** (Switch, optional): switch parameter, use it for Read-Only, don\'t use it for Full Protection
+  - **awsFullProtection** (Switch, optional): switch parameter, use it for to set the Security Groups in the account to Full-Protection in the course of onboarding, or don\'t use it to leave them unchanged
   - **azureSubscriptionID** (String, optional): Azure subscription ID
   - **azureActiveDirectoryID** (String, optional): Azure
     Active Directory ID\\tenant ID
