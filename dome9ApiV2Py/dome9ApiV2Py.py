@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import json
 import requests
-from requests import ConnectionError, auth
 import urlparse
+from requests import ConnectionError, auth
+
 
 class Dome9ApiSDK(object):
 	REGION_PROTECTION_MODES = ['FullManage', 'ReadOnly', 'Reset']
