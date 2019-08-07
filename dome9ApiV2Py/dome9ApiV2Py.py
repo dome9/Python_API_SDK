@@ -277,6 +277,9 @@ class Dome9ApiClient(Dome9ApiSDK):
 	def getCloudSecurityGroupIDsOfVpc(self, vpcID):
     		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
 
+        def getCloudSecurityGroupsIdsOfAccount(self, accountID):
+                return [secGrp['externalId'] for secGrp in self.getAwsSecurityGroups() if secGrp['awsAccountId'] == accountID]
+
 	def setCloudRegionsProtectedMode(self, ID, protectionMode, regions='all'):
 		if protectionMode not in Dome9ApiSDK.REGION_PROTECTION_MODES:
 			raise ValueError('Valid modes are: {}'.format(Dome9ApiSDK.REGION_PROTECTION_MODES))

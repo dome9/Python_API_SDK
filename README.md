@@ -139,6 +139,15 @@ Params:
  
 Optional: 
 
+### ** Method getCloudSecurityGroupsIdsOfAccount
+
+Task: get all security group IDs for a specific account
+
+Params:
+
+ Mandatory: cloudAccountID(str)
+
+Optional:
 
 ## SDK Methods 
 
