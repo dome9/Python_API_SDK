@@ -121,6 +121,55 @@ class Dome9ApiSDK(object):
 			print(json.dumps(apiCall))
 		return apiCall
 
+	def getAccountPollingInterval(self, outAsJson=False):
+		apiCall = self.get(route='AccountPollingInterval')
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+
+	def updateAccountPollingInterval(self,interval, ruleID, cloudAccountId = None, entityType = None, region = None, outAsJson=False):
+
+		data = {
+				"interval": interval,
+				"cloudAccountId": cloudAccountId,
+				"entityType": entityType,
+				"region": region
+				}
+
+		route = 'AccountPollingInterval/{}'.format(ruleID)
+		apiCall = self.put(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
+	def deleteAccountPollingInterval(self,ruleID, outAsJson=False):
+
+		data = {}
+
+		route = 'AccountPollingInterval/{}'.format(ruleID)
+		apiCall = self.delete(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
+	def createAccountPollingInterval(self,interval, cloudAccountId = None, entityType = None, region = None, outAsJson=False):
+
+		data = {
+				"interval": interval,
+				"cloudAccountId": cloudAccountId,
+				"entityType": entityType,
+				"region": region
+				}
+
+		route = 'AccountPollingInterval'
+		apiCall = self.post(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
 	def onBoardingAwsAccount(self,arn, secret, fullProtection=False, allowReadOnly=False, name=None, outAsJson=False):
 
 		data = {
@@ -327,6 +376,8 @@ class Dome9ApiSDK(object):
 
 
 class Dome9ApiClient(Dome9ApiSDK):
+	def convertRegionToDome9Format(self, region):
+		return region.replace('-','_')
 
 	def getCloudSecurityGroupsInRegion(self, region, names=False):
 		groupID = 'name' if names else 'id'
@@ -349,9 +400,10 @@ class Dome9ApiClient(Dome9ApiSDK):
 		if regions == 'all':
 			cloudAccountRegions = allUsersRegions
 		else:
-			if not set(regions).issubset(allUsersRegions):
-				raise Exception('requested regions:{} are not a valid regions, available:{}'.format(regions, allUsersRegions))
-			cloudAccountRegions = regions
+			convertedRegions = [self.convertRegionToDome9Format(region) for region in regions]
+			if not set(convertedRegions).issubset(allUsersRegions):
+				raise Exception('requested regions:{} are not a valid regions, available:{}'.format(regions, convertedRegions))
+			cloudAccountRegions = convertedRegions
 
 		for region in cloudAccountRegions:
 			data = json.dumps(

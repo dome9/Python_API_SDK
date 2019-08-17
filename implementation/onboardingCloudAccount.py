@@ -6,25 +6,32 @@ from dome9ApiV2Py import Dome9ApiClient
 
 
 class OnBoardingCloudAccount(object):
-	VENDOR_TYPES = ['aws', 'azure']
+	AWS_VENDOR = 'aws'
+	AZURE_VENDOR = 'azure'
+	VENDOR_TYPES = [AWS_VENDOR, AZURE_VENDOR]
 	AWS_ALLOW_READONLY = [True, False]
 	AWS_FULL_PROTECTION = [True, False]
 	AWS_SRL = '1'
 	AZURE_OPERATION_MODE = ['Read', 'Manage']
 	AZURE_SRL = '7'
+	D9_PROTECTION_MODE = 'Reset'
 
 	def __init__(self, args):
 		self.args = args
 		self.d9client = Dome9ApiClient(apiKeyID=args.dome9ApiKeyID, apiSecret=args.dome9ApiKeySecret)
 
 	def onBoardingNewAccount(self):
-		if self.args.cloudVendorType == 'aws':
+		print('Onboarding {} account'.format(self.args.cloudVendorType))
+		if self.args.cloudVendorType == OnBoardingCloudAccount.AWS_VENDOR:
 			if not self.args.awsRoleArn or not self.args.awsRoleExternalID:
 				sys.exit('Must specify roleArn and roleSecret\n example: --roleArn arn:aws:iam::111111111:role/Dome9-Connect --roleSecret sdf^87fsd987d')
 
 			cloudAccountObject = self.d9client.onBoardingAwsAccount(arn=self.args.awsRoleArn, secret=self.args.awsRoleExternalID, name=self.args.dome9CloudAccountName, allowReadOnly=self.args.awsAllowReadOnly, fullProtection= self.args.awsFullProtection)
 
-		elif self.args.cloudVendorType == 'azure':
+			if self.args.regionListLock:
+				self.protectRegions(cloudAccountObject['externalAccountNumber'])
+
+		elif self.args.cloudVendorType == OnBoardingCloudAccount.AZURE_VENDOR:
 			if not self.args.azureSubscriptionID or not self.args.azureActiveDirectoryID or not self.args.azureApplicationID or not self.args.azureSecretKey:
 				sys.exit('Must specify subscriptionID, tenantID, clientID and clientPassword\n example:')
 
@@ -32,17 +39,11 @@ class OnBoardingCloudAccount(object):
 
 		return cloudAccountObject['id']
 
-	def mainProcess(self):
-		print('Onboarding {} account'.format(self.args.cloudVendorType))
-		cloudAccountID = self.onBoardingNewAccount()
-
-		if self.args.dome9OuID:
-			print('Attach cloudAccount {} to OU {}'.format(cloudAccountID, self.args.dome9OuID))
-			self.d9client.updateOrganizationalUnitForCloudAccount(vendor=self.args.cloudVendorType, cloudAccountID=cloudAccountID, organizationalUnitID=self.args.dome9OuID)
-
-		if self.args.cloudVendorType == 'aws':
+	def setPermittion(self, cloudAccountID):
+		print('Set permissions for cloud accoint {}'.format(cloudAccountID))
+		if self.args.cloudVendorType == OnBoardingCloudAccount.AWS_VENDOR:
 			srl = '|'.join([OnBoardingCloudAccount.AWS_SRL, cloudAccountID])
-		elif self.args.cloudVendorType == 'azure':
+		elif self.args.cloudVendorType == OnBoardingCloudAccount.AZURE_VENDOR:
 			srl = '|'.join([OnBoardingCloudAccount.AZURE_SRL, cloudAccountID])
 
 		if self.args.dome9AdminRoleID:
@@ -65,15 +66,36 @@ class OnBoardingCloudAccount(object):
 			permission = roleObject['permissions']
 			viewPermission = permission['view']
 			viewPermission.append(srl)
-			self.d9client.updateRoleByID(roleID=self.args.dome9ViewRoleID , permissions=permission,roleName=roleObject['name'])
+			self.d9client.updateRoleByID(roleID=self.args.dome9ViewRoleID, permissions=permission, roleName=roleObject['name'])
 
+	def protectRegions(self, externalAccountID):
+		print('lock regions: {}'.format(self.args.regionListLock))
+		if self.args.regionListLock:
+			if self.args.regionListLock == 'all':
+				self.d9client.setCloudRegionsProtectedMode(externalAccountID, protectionMode=OnBoardingCloudAccount.D9_PROTECTION_MODE)
+			else:
+				regionList = self.args.regionListLock.split(',')
+				self.d9client.setCloudRegionsProtectedMode(externalAccountID, protectionMode=OnBoardingCloudAccount.D9_PROTECTION_MODE, regions=regionList)
+
+
+	def mainProcess(self):
+		cloudAccountID = self.onBoardingNewAccount()
+
+		if self.args.dome9OuID:
+			print('Attach cloudAccount {} to OU {}'.format(cloudAccountID, self.args.dome9OuID))
+			self.d9client.updateOrganizationalUnitForCloudAccount(vendor=self.args.cloudVendorType, cloudAccountID=cloudAccountID, organizationalUnitID=self.args.dome9OuID)
+
+		if self.args.dome9AdminRoleID or self.args.dome9ViewRoleID:
+			self.setPermittion(cloudAccountID)
+
+		print('Tool finished successfully')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='')
 	useExample = '''
 	AWS:
 	--dome9ApiKeyID sdfsdfssdf --dome9ApiKeySecret sdfsdfssdf --cloudVendorType aws --awsRoleArn arn:aws:iam::111111111:role/Dome9-Connect --awsRoleExternalID sdfsdfsdff --dome9OuID e21b3e8b-e02f-46df-bd70-8ce65ca8a3a5 --dome9CloudAccountName production --dome9AdminRoleID 118187 --dome9ViewRoleID 118203
-	
+
 	Azure:
 	--dome9ApiKeyID ddsfsdfsdf --dome9ApiKeySecret sdfsdfssdf --cloudVendorType azure --azureSubscriptionID sdfsdfsdfsdfsd --azureActiveDirectoryID sdfsdsdfsdsdfsd --azureApplicationID sfsdfsdfsfdsdf --azureSecretKey sdfsfsfsfd --dome9OuID 92f9a334-bf29-48a5-9cf8-66a10efe51e6 --dome9CloudAccountName production --dome9AdminRoleID 118881 --dome9ViewRoleID 118901 --azureOperationMode Manage
 	'''
@@ -94,6 +116,7 @@ if __name__ == '__main__':
 	parser.add_argument('--dome9OuID',              required=False, type=str, help='Organization Unit ID to attach cloud account')
 	parser.add_argument('--dome9AdminRoleID',       required=False, type=str, help='Dome9 role ID to get admin permission to the account')
 	parser.add_argument('--dome9ViewRoleID',        required=False, type=str, help='Dome9 role ID to get read permission to the account')
+	parser.add_argument('--regionListLock',        required=False, type=str, help='List of region to change state to protect, to set all region pass all')
 
 
 	arguments = parser.parse_args()
