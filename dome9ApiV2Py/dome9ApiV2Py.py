@@ -156,6 +156,28 @@ class Dome9ApiSDK(object):
 
 		return apiCall
 
+	def updateAwsAccountCredentials(self, arn, secret, externalAccountNumber=None, cloudAccountID=None,  outAsJson=False):
+
+		data = {
+			 "data": {
+			   "arn": arn,
+			   "secret": secret,
+			   "type": "RoleBased"
+			 }
+			}
+
+		if cloudAccountID:
+			data['cloudAccountId'] = cloudAccountID
+		if externalAccountNumber:
+			data['externalAccountNumber'] = externalAccountNumber
+
+		route = 'CloudAccounts/credentials'
+		apiCall = self.put(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
 	def updateOrganizationalUnitForAWSCloudAccount(self,cloudAccountID, organizationalUnitID=None, outAsJson=False):
 
 		data = {"organizationalUnitId": organizationalUnitID}
