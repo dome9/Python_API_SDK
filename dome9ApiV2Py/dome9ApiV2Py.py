@@ -8,7 +8,15 @@ from requests import ConnectionError, auth
 class Dome9ApiSDK(object):
 	REGION_PROTECTION_MODES = ['FullManage', 'ReadOnly', 'Reset']
 	SEC_GRP_PROTECTION_MODES = ['FullManage', 'ReadOnly']
-	
+
+	@staticmethod
+	def getJson(path):
+		try:
+			with open(path) as jsonFile:
+				return json.load(jsonFile)
+		except Exception as err:
+			exit(err)
+
 	def __init__(self, apiKeyID, apiSecret, apiAddress='https://api.dome9.com', apiVersion='v2'):
 		self.apiKeyID = apiKeyID
 		self.apiSecret = apiSecret
@@ -284,7 +292,27 @@ class Dome9ApiSDK(object):
 		if outAsJson:
 			print(json.dumps(apiCall))
 		return apiCall
-	
+
+	def getAccountBundles(self, outAsJson=False):
+		apiCall = self.get(route='CompliancePolicy')
+
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+
+	def updateRuleBundleByID(self, ruleID, ruleSet, outAsJson=False):
+
+		data = {
+					"id": ruleID,
+					"rules" : ruleSet
+				}
+
+		route = 'CompliancePolicy'
+		apiCall = self.put(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
 
 
 class Dome9ApiClient(Dome9ApiSDK):
