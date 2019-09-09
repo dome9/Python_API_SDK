@@ -8,7 +8,12 @@ from requests import ConnectionError, auth
 class Dome9ApiSDK(object):
 	REGION_PROTECTION_MODES = ['FullManage', 'ReadOnly', 'Reset']
 	SEC_GRP_PROTECTION_MODES = ['FullManage', 'ReadOnly']
-	
+
+	@staticmethod
+	def getJson(path):
+		with open(path) as jsonFile:
+			return json.load(jsonFile)
+
 	def __init__(self, apiKeyID, apiSecret, apiAddress='https://api.dome9.com', apiVersion='v2'):
 		self.apiKeyID = apiKeyID
 		self.apiSecret = apiSecret
@@ -255,11 +260,11 @@ class Dome9ApiSDK(object):
 
 	def getAllEntityFetchStatus(self, ID, outAsJson=False):
 		apiCall = self.get(route='EntityFetchStatus?cloudAccountId={}'.format(ID))
-		
+
 		if outAsJson:
 			print(json.dumps(apiCall))
 		return apiCall
-	
+
 	def cloudAccountSyncNow(self, ID, outAsJson=False):
 		apiCall = self.post(route='cloudaccounts/{}/SyncNow'.format(ID))
 		if outAsJson:
@@ -276,7 +281,7 @@ class Dome9ApiSDK(object):
 		if outAsJson:
 			print(json.dumps(apiCall))
 		return apiCall
-	
+
 	def runAssessmenBundle(self, assReq, outAsJson=False): # assessmentRequest
 		data = json.dumps(assReq)
 		route = 'assessment/bundleV2'
@@ -284,11 +289,25 @@ class Dome9ApiSDK(object):
 		if outAsJson:
 			print(json.dumps(apiCall))
 		return apiCall
-	
+
+	def getAccountBundles(self, outAsJson=False):
+		apiCall = self.get(route='CompliancePolicy')
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
+
+	def updateRuleBundleByID(self, ruleID, ruleSet, outAsJson=False):
+		data = {'id': ruleID, 'rules': ruleSet}
+		apiCall = self.put(route='CompliancePolicy', payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+
+		return apiCall
 
 
 class Dome9ApiClient(Dome9ApiSDK):
-    	
+
 	def getCloudSecurityGroupsInRegion(self, region, names=False):
 		groupID = 'name' if names else 'id'
 		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['regionId'] == region]
@@ -297,15 +316,15 @@ class Dome9ApiClient(Dome9ApiSDK):
 		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
 
 	def getCloudSecurityGroupIDsOfVpc(self, vpcID):
-    		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
+		return [secGrp['id'] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
 
-        def getCloudSecurityGroupsIdsOfAccount(self, accountID):
-                return [secGrp['externalId'] for secGrp in self.getAwsSecurityGroups() if secGrp['awsAccountId'] == accountID]
+	def getCloudSecurityGroupsIdsOfAccount(self, accountID):
+		return [secGrp['externalId'] for secGrp in self.getAwsSecurityGroups() if secGrp['awsAccountId'] == accountID]
 
 	def setCloudRegionsProtectedMode(self, ID, protectionMode, regions='all'):
 		if protectionMode not in Dome9ApiSDK.REGION_PROTECTION_MODES:
 			raise ValueError('Valid modes are: {}'.format(Dome9ApiSDK.REGION_PROTECTION_MODES))
-		
+
 		allUsersRegions = self.getCloudAccountRegions(ID=ID)
 		if regions == 'all':
 			cloudAccountRegions = allUsersRegions
@@ -321,7 +340,7 @@ class Dome9ApiClient(Dome9ApiSDK):
 			self.put(route='cloudaccounts/region-conf', payload=data)
 
 	def setCloudSecurityGroupsProtectionModeInRegion(self, region, protectionMode):
-    		secGrpsRegion = self.getCloudSecurityGroupsInRegion(region=region)
+		secGrpsRegion = self.getCloudSecurityGroupsInRegion(region=region)
 		if not secGrpsRegion:
 			raise ValueError('got 0 security groups!')
 		for secGrpID in secGrpsRegion:
