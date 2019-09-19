@@ -271,6 +271,26 @@ class Dome9ApiSDK(object):
 			print(json.dumps(apiCall))
 		return apiCall
 
+	def acquireAwsLease(self, cloudAccountId, securityGroupId, ip, portFrom, portTo=None, protocol=None, length=None, region=None, accountId=None, name=None, outAsJson=False):
+		route = 'accesslease/aws'
+		temp_data = {
+			'cloudAccountId' : cloudAccountId,
+			'securityGroupId': securityGroupId,
+			'ip'             : ip,
+			'portFrom'       : portFrom,
+			'portTo'         : portTo,
+			'protocol'       : protocol,
+			'length'         : length,
+			'region'         : region,
+			'accountId'      : accountId,
+			'name'           : name
+		}
+		data = {key: value for key, value in temp_data if value is not None}
+		apiCall = self.post(route=route, payload=json.dumps(data))
+		if outAsJson:
+			print(json.dumps(apiCall))
+		return apiCall
+
 	def setCloudSecurityGroupProtectionMode(self, ID, protectionMode, outAsJson=False):
 		if protectionMode not in Dome9ApiSDK.SEC_GRP_PROTECTION_MODES:
 			raise ValueError('Valid modes are: {}'.format(Dome9ApiSDK.SEC_GRP_PROTECTION_MODES))
