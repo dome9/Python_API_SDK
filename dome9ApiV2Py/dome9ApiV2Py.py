@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from enum import Enum
-from urllib.parse import urljoin
 import json
 import requests
 from re import match
+from enum import Enum
+from urllib.parse import urljoin
 from requests.auth import HTTPBasicAuth
-from typing import Dict, Any, Union, Optional, List
+from typing import Dict, Any, Union, Optional, List, Set
 
 
 class Dome9APIException(Exception):
@@ -185,24 +185,37 @@ class Regions(Enum):
 	US_GOV_EAST_1 = 'us_gov_east_1'
 
 
-class RegionProtectionModes(Enum):
-	FULL_MANAGE = 'FullManage'
-	READ_ONLY = 'ReadOnly'
-	RESET = 'Reset'
-
-
 class OperationModes(Enum):
 	READ = 'Read'
 	MANAGED = 'Managed'
 
 
-class ProtectionMode(Enum):
+class ProtectionModes(Enum):
 	FULL_MANAGE = 'FullManage'
 	READ_ONLY = 'ReadOnly'
 
 
-class Dome9APISDK:
+class CloudAccountTypes(Enum):
+	AWS = 'Aws'
+	AZURE = 'Azure'
+	GOOGLE = 'Google'
+	KUBERNETES = 'Kubernetes'
 
+
+class NewGroupBehaviors(Enum):
+	READ_ONLY = 'ReadOnly'
+	FULL_MANAGE = 'FullManage'
+	RESET = 'Reset'
+
+
+class Vendors(Enum):
+	AWS = 'aws'
+	AZURE = 'azure'
+	GOOGLE = 'google'
+	KUBERNETES = 'kubernetes'
+
+
+class Dome9APISDK:
 	class _RequestMethods(Enum):
 		GET = 'get'
 		POST = 'post'
@@ -210,21 +223,87 @@ class Dome9APISDK:
 		PUT = 'put'
 		DELETE = 'delete'
 
+
 	_ORIGIN = 'https://api.dome9.com/v2/'
-	# UUID format '01234567-89ab-cdef-01234-567890123456'
-	_UUID_REGEX = r'^[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}$'
-	_LOWERCASE_ALPHANUMERIC_REGEX = '^[0-9a-z]+$'
-	_TWELVE_DIGITS_REGEX = r'^\d{12}$'
-	# HTTP URL format http://www.domain:80/page.html
-	_HTTP_URL_REGEX = r'^(http)s?://(([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,6}\.?|[a-zA-Z0-9-]{2,}\.?)|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(/?|[/?]\S+)$'
-	# ARN format 'arn:partition:service:region:account-id:resource-type:resource-id'
-	_ARN_REGEX = '^arn:aws[^:]*:[^:]*:[^:]*:[^:]*:[^:]*(:[^:]*)?$'
-	# IP format '192.168.0.10'
-	_IP_REGEX = r'^(((\d)|([1-9]\d)|(1\d{2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d)|([1-9]\d)|(1\d{2})|(2[0-4]\d)|(25[0-5]))$'
-	# Duration format [D].H:M:S '1.0:0:0' '2:0:0'
-	_DURATION_REGEX = r'^((0\.)|([1-9]\d*\.))?((\d)|(1\d)|(2[0-4])):((\d)|([1-5]\d)):((\d)|([1-5]\d))$'
-	# Email format 'abc@google.com'
-	_EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+
+	@staticmethod
+	def _checkIsUUID(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkOnlyContainsLowercaseAlphanumeric(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match('^[0-9a-z]+$', arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkIsHTTPURL(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match(
+				r'^(http)s?://(([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,6}\.?|[a-zA-Z0-9-]{2,}\.?)|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(/?|[/?]\S+)$',
+				arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkIsARN(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match('^arn:aws[^:]*:[^:]*:[^:]*:[^:]*:[^:]*(:[^:]*)?$', arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkIsIP(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match(r'^(((\d)|([1-9]\d)|(1\d{2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d)|([1-9]\d)|(1\d{2})|(2[0-4]\d)|(25[0-5]))$', arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkIsDuration(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match(r'^((0\.)|([1-9]\d*\.))?((\d)|(1\d)|(2[0-4])):((\d)|([1-5]\d)):((\d)|([1-5]\d))$', arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkIsEmail(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkIsUUIDOr12Digits(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if not match(r'^\d{12}$', arg) and not match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', arg):
+			raise ValueError
+
+	@staticmethod
+	def _checkIsNotNegative(arg: int, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if arg < 0:
+			raise ValueError
+
+	@staticmethod
+	def _checkIsNotEmpty(arg: str, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if arg == '':
+			raise ValueError
+
+	@staticmethod
+	def _checkIsPort(arg: int, optional: bool = False) -> None:
+		if optional and arg is None:
+			return
+		if arg < 0 or arg > 65535:
+			raise ValueError
 
 	@staticmethod
 	def getJson(path: str) -> Any:
@@ -253,29 +332,14 @@ class Dome9APISDK:
 			origin (str): Origin of API (URL). Defaults to 'https://api.dome9.com/v2/'.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, key): raise ValueError
-		if not match(Dome9APISDK._LOWERCASE_ALPHANUMERIC_REGEX, secret): raise ValueError
-		if not match(Dome9APISDK._HTTP_URL_REGEX, origin): raise ValueError
+		Dome9APISDK._checkIsUUID(key)
+		Dome9APISDK._checkOnlyContainsLowercaseAlphanumeric(secret)
+		Dome9APISDK._checkIsHTTPURL(origin)
 
 		self._origin = origin
 		self._clientAuth = HTTPBasicAuth(key, secret)
 
 	def _request(self, method: _RequestMethods, route: str, body: Any = None, params: Optional[Dict[str, Union[str, int]]] = None) -> Any:
-		"""Sends a HTTP request.
-
-		Args:
-			method (_RequestMethods): HTTP method.
-			route (str): URL path (does not include origin).
-			body (Any): JSON payload. Defaults to None.
-			params (Dict[str, Union[str, int]], optional): Parameters. Defaults to None.
-
-		Returns:
-			API server's response.
-
-		Raises:
-			Dome9APIException: API command failed.
-		"""
-
 		url = urljoin(self._origin, route)
 		headers = {
 			'Accept'      : 'application/json',
@@ -320,7 +384,7 @@ class Dome9APISDK:
 		route = 'CloudAccounts'
 		return self._request(method=Dome9APISDK._RequestMethods.GET, route=route)
 
-	def getCloudAccountID(self, cloudAccountId: str) -> Dict[str, Any]:
+	def getCloudAccountId(self, cloudAccountId: str) -> Dict[str, Any]:
 		"""Fetch a specific AWS cloud account.
 
 		Args:
@@ -334,12 +398,12 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._TWELVE_DIGITS_REGEX, cloudAccountId) and not match(Dome9APISDK._UUID_REGEX, cloudAccountId): raise ValueError
+		Dome9APISDK._checkIsUUIDOr12Digits(cloudAccountId)
 
 		route = 'CloudAccounts/{}'.format(cloudAccountId)
 		return self._request(method=Dome9APISDK._RequestMethods.GET, route=route)
 
-	def getCloudAccountRegions(self, cloudAccountId: str) -> List[str]:
+	def getCloudAccountRegions(self, cloudAccountId: str) -> Set[str]:
 		"""Get all regions used in cloud account.
 
 		Args:
@@ -353,10 +417,10 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._TWELVE_DIGITS_REGEX, cloudAccountId) and not match(Dome9APISDK._UUID_REGEX, cloudAccountId): raise ValueError
+		Dome9APISDK._checkIsUUIDOr12Digits(cloudAccountId)
 
-		cloudAccountID = self.getCloudAccountID(cloudAccountId=cloudAccountId)
-		return list({region['region'] for region in cloudAccountID['netSec']['regions']})
+		cloudAccountId = self.getCloudAccountId(cloudAccountId=cloudAccountId)
+		return {region['region'] for region in cloudAccountId['netSec']['regions']}
 
 	def getRoles(self) -> List[Any]:
 		"""Get all roles.
@@ -386,8 +450,8 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._ARN_REGEX, arn): raise ValueError
-		if not match(Dome9APISDK._LOWERCASE_ALPHANUMERIC_REGEX, secret): raise ValueError
+		Dome9APISDK._checkIsARN(arn)
+		Dome9APISDK._checkOnlyContainsLowercaseAlphanumeric(secret)
 
 		route = 'CloudAccounts'
 		body = {
@@ -402,14 +466,14 @@ class Dome9APISDK:
 		}
 		self._request(method=Dome9APISDK._RequestMethods.POST, route=route, body=body)
 
-	def onBoardingAzureAccount(self, subscriptionID: str, tenantID: str, clientID: str, clientPassword: str, name: Optional[str] = None,
+	def onBoardingAzureAccount(self, subscriptionId: str, tenantId: str, clientId: str, clientPassword: str, name: Optional[str] = None,
 	                           operationMode: OperationModes = OperationModes.READ) -> None:
 		"""Add (onboard) an Azure account to the user's Dome9 account.
 
 		Args:
-			subscriptionID (str): Azure subscription id for account.
-			tenantID (str): Azure tenant id.
-			clientID (str): Azure account id.
+			subscriptionId (str): Azure subscription id for account.
+			tenantId (str): Azure tenant id.
+			clientId (str): Azure account id.
 			clientPassword (str): Password for account.
 			name (str, optional): Account name (in Dome9). Defaults to None.
 			operationMode (OperationModes): Dome9 operation mode for the Azure account (Read or Managed). Defaults to Read.
@@ -419,47 +483,47 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, subscriptionID): raise ValueError
-		if not match(Dome9APISDK._UUID_REGEX, tenantID): raise ValueError
-		if not match(Dome9APISDK._UUID_REGEX, clientID): raise ValueError
+		Dome9APISDK._checkIsUUID(subscriptionId)
+		Dome9APISDK._checkIsUUID(tenantId)
+		Dome9APISDK._checkIsUUID(clientId)
 
 		route = 'AzureCloudAccount'
 		body = {
 			'name'          : name,
-			'subscriptionId': subscriptionID,
-			'tenantId'      : tenantID,
+			'subscriptionId': subscriptionId,
+			'tenantId'      : tenantId,
 			'credentials'   : {
-				'clientId'      : clientID,
+				'clientId'      : clientId,
 				'clientPassword': clientPassword
 			},
-			'operationMode' : operationMode,
+			'operationMode' : operationMode.value,
 		}
 		self._request(method=Dome9APISDK._RequestMethods.POST, route=route, body=body)
 
-	def updateAwsAccountCredentials(self, arn: str, secret: str, externalAccountNumber: Optional[str] = None, cloudAccountID: Optional[str] = None) -> None:
+	def updateAwsAccountCredentials(self, arn: str, secret: str, externalAccountNumber: Optional[str] = None, cloudAccountId: Optional[str] = None) -> None:
 		"""Update credentials for an AWS cloud account in Dome9. At least one of the following properties must be provided: "cloudAccountId", "externalAccountNumber".
 
 		Args:
 			arn (str): AWS Role ARN (to be assumed by Dome9 System).
 			secret (str): The AWS role External ID (Dome9 System will have to use this secret in order to assume the role).
 			externalAccountNumber (str, optional): Aws external account number, at least one of the following properties must be provided: "cloudAccountId", "externalAccountNumber". Defaults to None.
-			cloudAccountID (str, optional): The Dome9 cloud account id, at least one of the following properties must be provided: "cloudAccountId", "externalAccountNumber". Defaults to None.
+			cloudAccountId (str, optional): The Dome9 cloud account id, at least one of the following properties must be provided: "cloudAccountId", "externalAccountNumber". Defaults to None.
 
 		Raises:
 			ValueError: Invalid input.
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._ARN_REGEX, arn): raise ValueError
-		if not match(Dome9APISDK._LOWERCASE_ALPHANUMERIC_REGEX, secret): raise ValueError
-		if externalAccountNumber is not None and not match(Dome9APISDK._LOWERCASE_ALPHANUMERIC_REGEX, externalAccountNumber): raise ValueError
-		if cloudAccountID is not None and not match(Dome9APISDK._UUID_REGEX, cloudAccountID): raise ValueError
+		Dome9APISDK._checkIsARN(arn)
+		Dome9APISDK._checkOnlyContainsLowercaseAlphanumeric(secret)
+		# check externalAccountNumber format
+		Dome9APISDK._checkIsUUID(cloudAccountId, optional=True)
 
 		route = 'CloudAccounts/credentials'
 		body = {
-			'cloudAccountId': cloudAccountID,
+			'cloudAccountId'       : cloudAccountId,
 			'externalAccountNumber': externalAccountNumber,
-			'data': {
+			'data'                 : {
 				'arn'   : arn,
 				'secret': secret,
 				'type'  : 'RoleBased'
@@ -467,12 +531,12 @@ class Dome9APISDK:
 		}
 		self._request(method=Dome9APISDK._RequestMethods.PUT, route=route, body=body)
 
-	def updateOrganizationalUnitForAWSCloudAccount(self, cloudAccountID: str, organizationalUnitID: Optional[str] = None) -> Dict[str, Any]:
+	def updateOrganizationalUnitForAWSCloudAccount(self, cloudAccountId: str, organizationalUnitId: Optional[str] = None) -> Dict[str, Any]:
 		"""Update the ID of the Organizational unit that this cloud account will be attached to. Use 'null' for root organizational unit.
 
 		Args:
-			cloudAccountID (str): Guid ID of the AWS cloud account.
-			organizationalUnitID (str, optional): The Guid ID of the Organizational Unit to attach to. Use null in order to attach to root Organizational Unit. Defaults to None.
+			cloudAccountId (str): Guid ID of the AWS cloud account.
+			organizationalUnitId (str, optional): Guid ID of the Organizational Unit to attach to. Use null in order to attach to root Organizational Unit. Defaults to None.
 
 		Returns:
 			Cloud account.
@@ -482,21 +546,21 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, cloudAccountID): raise ValueError
-		if organizationalUnitID is not None and not match(Dome9APISDK._UUID_REGEX, organizationalUnitID): raise ValueError
+		Dome9APISDK._checkIsUUID(cloudAccountId)
+		Dome9APISDK._checkIsUUID(organizationalUnitId, optional=True)
 
-		route = 'cloudaccounts/{}/organizationalUnit'.format(cloudAccountID)
+		route = 'cloudaccounts/{}/organizationalUnit'.format(cloudAccountId)
 		body = {
-			'organizationalUnitId': organizationalUnitID
+			'organizationalUnitId': organizationalUnitId
 		}
 		return self._request(method=Dome9APISDK._RequestMethods.PUT, route=route, body=body)
 
-	def updateOrganizationalUnitForAzureCloudAccount(self, cloudAccountID: str, organizationalUnitID: Optional[str] = None) -> Dict[str, Any]:
+	def updateOrganizationalUnitForAzureCloudAccount(self, cloudAccountId: str, organizationalUnitId: Optional[str] = None) -> Dict[str, Any]:
 		"""Update the ID of the Organizational unit that this cloud account will be attached to. Use 'null' for root organizational unit.
 
 		Args:
-			cloudAccountID (str): Guid ID of the Azure cloud account.
-			organizationalUnitID (str, optional): Guid ID of the Organizational Unit to attach to. Use null in order to attach to root Organizational Unit. Defaults to None.
+			cloudAccountId (str): Guid ID of the Azure cloud account.
+			organizationalUnitId (str, optional): Guid ID of the Organizational Unit to attach to. Use null in order to attach to root Organizational Unit. Defaults to None.
 
 		Returns:
 			Azure cloud account.
@@ -506,21 +570,22 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, cloudAccountID): raise ValueError
-		if organizationalUnitID is not None and not match(Dome9APISDK._UUID_REGEX, organizationalUnitID): raise ValueError
+		Dome9APISDK._checkIsUUID(cloudAccountId)
+		Dome9APISDK._checkIsUUID(organizationalUnitId, optional=True)
 
-		route = 'AzureCloudAccount/{}/organizationalUnit'.format(cloudAccountID)
+		route = 'AzureCloudAccount/{}/organizationalUnit'.format(cloudAccountId)
 		body = {
-			'organizationalUnitId': organizationalUnitID
+			'organizationalUnitId': organizationalUnitId
 		}
 		return self._request(method=Dome9APISDK._RequestMethods.PUT, route=route, body=body)
 
-	def updateRoleByID(self, roleID: int, roleName: str, access: Optional[List[str]] = None, manage: Optional[List[str]] = None, create: Optional[List[str]] = None, view: Optional[List[str]] = None,
+	def updateRoleById(self, roleId: int, roleName: str, access: Optional[List[str]] = None, manage: Optional[List[str]] = None, create: Optional[List[str]] = None,
+	                   view: Optional[List[str]] = None,
 	                   crossAccountAccess: Optional[List[str]] = None) -> None:
 		"""Update a role.
 
 		Args:
-			roleID (int): Role id.
+			roleId (int): Role id.
 			roleName (str): Role Name.
 			access (List[str], optional): Access permission list (list of SRL). Defaults to None.
 			manage (List[str], optional): Manage permission list (list of SRL). Defaults to None.
@@ -533,8 +598,8 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if roleID < 0: raise ValueError
-		if roleName == '': raise ValueError
+		Dome9APISDK._checkIsNotNegative(roleId)
+		Dome9APISDK._checkIsNotEmpty(roleName)
 
 		body = {
 			'name'       : roleName,
@@ -546,14 +611,14 @@ class Dome9APISDK:
 				'crossAccountAccess': crossAccountAccess
 			}
 		}
-		route = 'Role/{}'.format(roleID)
+		route = 'Role/{}'.format(roleId)
 		self._request(method=Dome9APISDK._RequestMethods.PUT, route=route, body=body)
 
-	def getRoleByID(self, roleID: int) -> Dict[str, Any]:
+	def getRoleById(self, roleId: int) -> Dict[str, Any]:
 		"""Get the specific role with the specified id.
 
 		Args:
-			roleID (int): Role id.
+			roleId (int): Role id.
 
 		Returns:
 			Role.
@@ -563,17 +628,57 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if roleID < 0: raise ValueError
+		Dome9APISDK._checkIsNotNegative(roleId)
 
-		route = 'Role/{}'.format(roleID)
+		route = 'Role/{}'.format(roleId)
 		return self._request(method=Dome9APISDK._RequestMethods.GET, route=route)
 
-	'''def updateCloudAccountID(self, id: Union[str, int], data):
+	# doesn't exist in documentation
+	def updateCloudAccountID(self, cloudAccountId: str, name: Optional[str] = None, fullProtection: Optional[bool] = None, allowReadOnly: Optional[bool] = None,
+	                         organizationalUnitId: Optional[str] = None, organizationalUnitPath: Optional[str] = None, organizationalUnitName: Optional[str] = None,
+	                         lambdaScanner: Optional[bool] = None, arn: Optional[str] = None, secret: Optional[str] = None) -> None:
+		"""Edit an existing AWS cloud account on Dome9.
 
-		# <- add docstring here
+		Args:
+			cloudAccountId (str): Dome9 id.
+			name (str, optional): Cloud account name. Defaults to None.
+			fullProtection (bool, optional): As part of the AWS account onboarding, the account security groups are imported. This flag determines whether to enable Tamper Protection mode for those security groups. Defaults to None.
+			allowReadOnly (bool, optional): Determines the AWS cloud account operation mode. For "Manage" set to true, for "Readonly" set to false. Defaults to None.
+			organizationalUnitId (str, optional): -. Defaults to None.
+			organizationalUnitPath (str, optional): -. Defaults to None.
+			organizationalUnitName (str, optional): -. Defaults to None.
+			lambdaScanner (bool, optional): Flag indicating if lambda scanner is enabled/disabled for the account. Defaults to None.
+			arn (str, optional): AWS Role ARN (to be assumed by Dome9 System). Defaults to None.
+			secret (str, optional): AWS role External ID (Dome9 System will have to use this secret in order to assume the role). Defaults to None.
 
-		apiCall = self.patch(route='CloudAccounts/{}'.format(id), payload=data)
-		return apiCall'''
+		Raises:
+			ValueError: Invalid input.
+			Dome9APIException: API command failed.
+		"""
+
+		Dome9APISDK._checkIsUUID(cloudAccountId)
+		Dome9APISDK._checkIsUUID(organizationalUnitId, optional=True)
+		# validate organizationalUnitPath
+		# validate organizationalUnitName
+		Dome9APISDK._checkIsARN(arn)
+		Dome9APISDK._checkOnlyContainsLowercaseAlphanumeric(secret)
+
+		route = 'CloudAccounts/{}'.format(cloudAccountId)
+		body = {
+			'name'                   : name,
+			'fullProtection'         : fullProtection,
+			'allowReadOnly'          : allowReadOnly,
+			'organizationalUnitId'   : organizationalUnitId,
+			'organizationalUnitPath' : organizationalUnitPath,
+			'organizationalUnitName' : organizationalUnitName,
+			'lambdaScanner'          : lambdaScanner,
+			'CloudAccountCredentials': {
+				'arn'   : arn,
+				'secret': secret,
+				'type'  : 'RoleBased'
+			}
+		}
+		self._request(method=Dome9APISDK._RequestMethods.PATCH, route=route, body=body)
 
 	def getCloudTrail(self) -> List[Any]:
 		"""Get CloudTrail events for a Dome9 user.
@@ -601,11 +706,18 @@ class Dome9APISDK:
 		route = 'organizationalunit/GetFlatOrganizationalUnits'
 		return self._request(method=Dome9APISDK._RequestMethods.GET, route=route)
 
-	'''def getAwsSecurityGroups(self) -> Dict[str, Any]:
+	# doesn't exist in documentation
+	def getAwsSecurityGroups(self):
+		"""Get all security groups.
 
-		# <- add docstring here
+		Returns:
+			Security groups.
 
-		return self._request(method=Dome9ApiSDK._RequestMethod.GET, route='view/awssecuritygroup/index')'''
+		Raises:
+			Dome9APIException: API command failed.
+		"""
+
+		return self._request(method=Dome9APISDK._RequestMethods.GET, route='view/awssecuritygroup/index')
 
 	def getCloudSecurityGroup(self, cloudAccountId: str, regionId: Regions) -> List[Any]:
 		"""Get AWS security groups for a specific cloud account and region.
@@ -622,12 +734,12 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, cloudAccountId): raise ValueError
+		Dome9APISDK._checkIsUUID(cloudAccountId)
 
 		route = 'cloudsecuritygroup/{}'.format(cloudAccountId)
 		params = {
 			'cloudAccountId': cloudAccountId,
-			'regionId': regionId.value
+			'regionId'      : regionId.value
 		}
 		return self._request(method=Dome9APISDK._RequestMethods.GET, route=route, params=params)
 
@@ -645,7 +757,7 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, cloudAccountId): raise ValueError
+		Dome9APISDK._checkIsUUID(cloudAccountId)
 
 		route = 'EntityFetchStatus'
 		params = {
@@ -667,24 +779,24 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, cloudAccountId): raise ValueError
+		Dome9APISDK._checkIsUUID(cloudAccountId)
 
 		route = 'cloudaccounts/{}/SyncNow'.format(cloudAccountId)
 		return self._request(method=Dome9APISDK._RequestMethods.POST, route=route)
 
-	def setCloudSecurityGroupProtectionMode(self, securityGroupId: str, protectionMode: ProtectionMode) -> None:
+	def setCloudSecurityGroupProtectionMode(self, securityGroupId: str, protectionMode: ProtectionModes) -> None:
 		"""Change the protection mode for an AWS security group.
 
 		Args:
 			securityGroupId (str): AWS security group id (Dome9 internal ID / AWS security group ID).
-			protectionMode (CloudSecurityGroupProtectionModeChange): Details for the security group, including the protection mode. Only 'ProtectionMode' is required in this call (FullManage or ReadOnly).
+			protectionMode (ProtectionModes): Details for the security group, including the protection mode. Only 'ProtectionMode' is required in this call (FullManage or ReadOnly).
 
 		Raises:
 			ValueError: Invalid input.
 			Dome9APIException: API command failed.
 		"""
 
-		# <- check securityGroupId format
+		# validate securityGroupId
 
 		route = 'cloudsecuritygroup/{}/protection-mode'.format(securityGroupId)
 		body = {
@@ -692,13 +804,62 @@ class Dome9APISDK:
 		}
 		self._request(method=Dome9APISDK._RequestMethods.POST, route=route, body=body)
 
-	'''def runAssessmentBundle(self, id, name, description, isCft, dome9CloudAccountId, externalCloudAccountId, cloudAccountId, region, cloudNetwork, cloudAccountType, requestId, params, files) -> Dict[str, Any]:
-		# mandatory fields are: CloudAccountId, CloudAccountType, id
-		# <- add docstring here
+	def runAssessmentBundle(self, bundleId: int, cloudAccountId: str, cloudAccountType: CloudAccountTypes, name: Optional[str], description: Optional[str], isCft: Optional[bool],
+	                        dome9CloudAccountId: Optional[str], externalCloudAccountId: Optional[str], region: Optional[Regions], cloudNetwork: Optional[str],
+	                        rootName: Optional[str], params: Optional[List[Dict]], files: Optional[List[Dict]]) -> Dict[str, Any]:
+		"""Run an assessment on a cloud environment using a bundle (V2).
 
-		data = assReq
+		Args:
+			bundleId (int): Bundle id.
+			cloudAccountId (str): Account id on cloud provider (AWS, Azure, GCP).
+			cloudAccountType (CloudAccountTypes): Cloud provider (AWS/Azure/GCP).
+			name (str, optional): Bundle name. Defaults to None.
+			description (str, optional): Bundle description. Defaults to None.
+			isCft (bool, optional): Indicates request target is a CFT (template file). Defaults to None.
+			dome9CloudAccountId (str, optional): Dome9 account id. Defaults to None.
+			externalCloudAccountId (str, optional): Account id on cloud provider (AWS, Azure, GCP). Defaults to None.
+			region (Regions, optional): Cloud region for the account. Defaults to None.
+			cloudNetwork (str, optional): Cloud provider (AWS/Azure/GCP). Defaults to None.
+			rootName (str, optional): -. Defaults to None.
+			params (List[Dict], optional): -. Defaults to None.
+			files (List[Dict], optional): -. Defaults to None.
+
+		Returns:
+			Assessment result (aggregates results from multiple tests).
+
+		Raises:
+			ValueError: Invalid input.
+			Dome9APIException: API command failed.
+		"""
+
+		Dome9APISDK._checkIsNotNegative(bundleId)
+		# validate cloudAccountId
+		# validate dome9CloudAccountId
+		# validate externalCloudAccountId
+		# validate cloudNetwork
+		# validate rootName
+		# validate params
+		# validate files
+
 		route = 'assessment/bundleV2'
-		return self._request(method=Dome9ApiSDK._RequestMethod.POST, route=route, payload=data)'''
+		body = {
+			'id'                    : bundleId,
+			'cloudAccountId'        : cloudAccountId,
+			'cloudAccountType'      : cloudAccountType.value,
+			'name'                  : name,
+			'description'           : description,
+			'isCft'                 : isCft,
+			'dome9CloudAccountId'   : dome9CloudAccountId,
+			'externalCloudAccountId': externalCloudAccountId,
+			'region'                : region.value,
+			'cloudNetwork'          : cloudNetwork,
+			'cft'                   : {
+				'rootName': rootName,
+				'params'  : params,
+				'files'   : files
+			}
+		}
+		return self._request(method=Dome9APISDK._RequestMethods.POST, route=route, body=body)
 
 	def getAccountBundles(self) -> List[Any]:
 		"""Get all bundles.
@@ -713,7 +874,7 @@ class Dome9APISDK:
 		route = 'CompliancePolicy'
 		return self._request(method=Dome9APISDK._RequestMethods.GET, route=route)
 
-	def updateRuleBundleByID(self, bundleId: int, rules: List[Dict[str, Any]]) -> Dict[str, Any]:
+	def updateRuleBundleById(self, bundleId: int, rules: List[Dict[str, Any]]) -> Dict[str, Any]:
 		"""Update a Bundle.
 
 		Args:
@@ -728,16 +889,18 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if bundleId < 0: raise ValueError
-		# <- check rules format
+		Dome9APISDK._checkIsNotNegative(bundleId)
+		# validate rules
 
+		route = 'CompliancePolicy'
 		body = {
-			'id': bundleId,
+			'id'   : bundleId,
 			'rules': rules
 		}
-		return self._request(method=Dome9APISDK._RequestMethods.PUT, route='CompliancePolicy', body=body)
+		return self._request(method=Dome9APISDK._RequestMethods.PUT, route=route, body=body)
 
-	def acquireAwsLease(self, cloudAccountId: str, securityGroupId: Union[str, int], ip: str, portFrom: int, portTo: Optional[int] = None, protocol: Optional[Protocols] = None, duration: Optional[str] = None,
+	def acquireAwsLease(self, cloudAccountId: str, securityGroupId: int, ip: str, portFrom: int, portTo: Optional[int] = None, protocol: Optional[Protocols] = None,
+	                    duration: Optional[str] = None,
 	                    region: Optional[Regions] = None, accountId: Optional[int] = None, name: Optional[str] = None, user: Optional[str] = None) -> None:
 		"""Acquires an AWS lease.
 
@@ -759,14 +922,14 @@ class Dome9APISDK:
 			Dome9APIException: API command failed.
 		"""
 
-		if not match(Dome9APISDK._UUID_REGEX, cloudAccountId): raise ValueError
-		if securityGroupId < 0: raise ValueError
-		if not match(Dome9APISDK._IP_REGEX, ip): raise ValueError
-		if portFrom < 0 or portFrom > 65535: raise ValueError
-		if portTo is not None and (portTo < 0 or portTo > 65535): raise ValueError
-		if not match(Dome9APISDK._DURATION_REGEX, duration): raise ValueError
-		if accountId is not None and accountId < 0: raise ValueError
-		if user is not None and not match(Dome9APISDK._EMAIL_REGEX, user): raise ValueError
+		Dome9APISDK._checkIsUUID(cloudAccountId)
+		Dome9APISDK._checkIsNotNegative(securityGroupId)# doc says is string
+		Dome9APISDK._checkIsIP(ip)
+		Dome9APISDK._checkIsPort(portFrom)
+		Dome9APISDK._checkIsPort(portTo, optional=True)
+		Dome9APISDK._checkIsDuration(duration, optional=True)
+		Dome9APISDK._checkIsNotNegative(accountId, optional=True)
+		Dome9APISDK._checkIsEmail(user, optional=True)
 
 		route = 'accesslease/aws'
 		body = {
@@ -787,65 +950,145 @@ class Dome9APISDK:
 
 class Dome9APIClient(Dome9APISDK):
 
-	def getCloudSecurityGroupsInRegion(self, region: Regions, names: bool =False) -> List:
-		"""?
+	def getCloudSecurityGroupsInRegion(self, region: Regions, names: bool = False) -> Set[Union[str, int]]:
+		"""Get all security groups in region.
 
 		Args:
-			region (Regions): ?
-			names (bool, optional): ?
+			region (Regions): The region.
+			names (bool, optional): Should the group names be returned instead of ids. Defaults to False.
 
 		Returns:
-			?
+			Security groups.
+
+		Raises:
+			Dome9APIException: API command failed.
 		"""
 
-		groupID = 'name' if names else 'id'
-		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['regionId'] == region]
+		groupId = 'name' if names else 'id'
+		return {securityGroup[groupId] for securityGroup in self.getAwsSecurityGroups() if securityGroup['regionId'] == region.value}
 
-	def getCloudSecurityGroupsIDsOfVpc(self, vpcID, names: bool =False):
-		groupID = 'name' if names else 'id'
-		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
+	def getCloudSecurityGroupsOfVPC(self, vpcId: str, names: bool = False) -> Set[Union[str, int]]:
+		"""Get all security groups of VPC.
 
-	def getCloudSecurityGroupIDsOfVpc(self, vpcID, names: bool =False):
-		groupID = 'name' if names else 'id'
-		return [secGrp[groupID] for secGrp in self.getAwsSecurityGroups() if secGrp['vpcId'] == vpcID]
+		Args:
+			vpcId (str): The VPC.
+			names (bool, optional): Should the group names be returned instead of ids. Defaults to False.
 
-	def getCloudSecurityGroupsIdsOfAccount(self, accountID):
-		return [secGrp['externalId'] for secGrp in self.getAwsSecurityGroups() if secGrp['awsAccountId'] == accountID]
+		Returns:
+			Security groups.
 
-	def setCloudRegionsProtectedMode(self, ID, protectionMode, regions='all'):
-		if protectionMode not in Dome9ApiSDK.REGION_PROTECTION_MODES:
-			raise ValueError('Valid modes are: {}'.format(Dome9ApiSDK.REGION_PROTECTION_MODES))
+		Raises:
+			Dome9APIException: API command failed.
+		"""
 
-		allUsersRegions = self.getCloudAccountRegions(ID=ID)
-		if regions == 'all':
-			cloudAccountRegions = allUsersRegions
+		# validate vpcId
+
+		groupId = 'name' if names else 'id'
+		return {securityGroup[groupId] for securityGroup in self.getAwsSecurityGroups() if securityGroup['vpcId'] == vpcId}
+
+	def getCloudSecurityGroupsOfAccount(self, accountId: int) -> Set[str]:
+		"""Get all security groups of account.
+
+		Args:
+			accountId (int):
+
+		Returns:
+			Security groups.
+
+		Raises:
+			ValueError: Invalid input.
+			Dome9APIException: API command failed.
+		"""
+
+		Dome9APIClient._checkIsNotNegative(accountId)
+
+		return {securityGroup['externalId'] for securityGroup in self.getAwsSecurityGroups() if securityGroup['awsAccountId'] == accountId}
+
+	def setCloudRegionsProtectedMode(self, cloudAccountId: str, newGroupBehavior: NewGroupBehaviors, regions: Optional[Set[Regions]] = None) -> None:
+		"""Update AWS cloud account region configurations.
+
+		Args:
+			cloudAccountId (str): Dome9 AWS account id (UUID) or the AWS external account number (12 digit number).
+			newGroupBehavior (NewGroupBehaviors): The Protection Mode that Dome9 will apply to new security groups detected in the cloud account. ReadOnly New Security Groups will be included in Dome9 in Read-Only mode, without changes to any of the rules. FullManage New Security Groups will be included in Dome9 in Full Protection mode, without changes to any of the rules. Reset New Security Groups will be included in Dome9 in Full Protection mode, and all inbound and outbound rules will be cleared
+			regions (Regions, optional): Dome9 representation value for the AWS region. Defaults to None.
+
+		Raises:
+			Dome9APIException: API command failed.
+		"""
+
+		# validate cloudAccountId
+
+		tempAllUserRegions = self.getCloudAccountRegions(cloudAccountId=cloudAccountId)
+		regionMap = {region.value: region for region in Regions}
+		allUserRegions = {regionMap[region] for region in tempAllUserRegions}
+		if regions is None:
+			cloudAccountRegions = allUserRegions
 		else:
-			if not set(regions).issubset(allUsersRegions):
-				raise Exception('requested regions:{} are not a valid regions, available:{}'.format(regions, allUsersRegions))
+			if not regions.issubset(allUserRegions):
+				raise ValueError
 			cloudAccountRegions = regions
-
+		route = 'cloudaccounts/region-conf'
 		for region in cloudAccountRegions:
-			data = json.dumps(
-				{'externalAccountNumber': ID, 'data': {'region': region, 'newGroupBehavior': protectionMode}})
-			print('updating data: {}'.format(data))
-			self._request(method=Method.PUT, route='cloudaccounts/region-conf', payload=data)
+			body = {
+				'externalAccountNumber': cloudAccountId,
+				'data'                 : {
+					'region'          : region.value,
+					'newGroupBehavior': newGroupBehavior.value
+				}
+			}
+			self._request(method=Dome9APISDK._RequestMethods.PUT, route=route, body=body)
 
-	def setCloudSecurityGroupsProtectionModeInRegion(self, region, protectionMode):
-		secGrpsRegion = self.getCloudSecurityGroupsInRegion(region=region)
-		if not secGrpsRegion:
-			raise ValueError('got 0 security groups!')
-		for secGrpID in secGrpsRegion:
-			self.setCloudSecurityGroupProtectionMode(ID=secGrpID, protectionMode=protectionMode, outAsJson=True)
+	def setCloudSecurityGroupsProtectionModeInRegion(self, region: Regions, protectionMode: ProtectionModes) -> None:
+		"""Change the protection mode for all AWS security groups in region.
 
-	def setCloudSecurityGroupsProtectionModeOfVpc(self, vpcID, protectionMode):
-		vpcSecGrp = self.getCloudSecurityGroupIDsOfVpc(vpcID=vpcID)
-		if not vpcSecGrp:
-			raise ValueError('got 0 security groups!')
-		for secGrpID in vpcSecGrp:
-			self.setCloudSecurityGroupProtectionMode(ID=secGrpID, protectionMode=protectionMode, outAsJson=True)
+		Args:
+			region (Regions):
+			protectionMode (ProtectionModes):
 
-	def updateOrganizationalUnitForCloudAccount(self, vendor, cloudAccountID, organizationalUnitID):
-		if vendor == 'aws':
-			self.updateOrganizationalUnitForAWSCloudAccount(cloudAccountID, organizationalUnitID)
-		elif vendor == 'azure':
-			self.updateOrganizationalUnitForAzureCloudAccount(cloudAccountID, organizationalUnitID)
+		Raises:
+			Dome9APIException: API command failed.
+		"""
+
+		securityGroups = self.getCloudSecurityGroupsInRegion(region=region)
+		for securityGroupId in securityGroups:
+			self.setCloudSecurityGroupProtectionMode(securityGroupId=securityGroupId, protectionMode=protectionMode)
+
+	def setCloudSecurityGroupsProtectionModeOfVPC(self, vpcId: str, protectionMode: ProtectionModes) -> None:
+		"""Change the protection mode for all AWS security groups of VPC.
+
+		Args:
+			vpcId (str):
+			protectionMode (ProtectionModes):
+
+		Raises:
+			Dome9APIException: API command failed.
+		"""
+
+		# validate vpcId
+
+		securityGroups = self.getCloudSecurityGroupsOfVPC(vpcId=vpcId)
+		for securityGroupId in securityGroups:
+			self.setCloudSecurityGroupProtectionMode(securityGroupId=securityGroupId, protectionMode=protectionMode)
+
+	def updateOrganizationalUnitForCloudAccount(self, vendor: Vendors, cloudAccountId: str, organizationalUnitId: Optional[str] = None) -> None:
+		"""Update the ID of the Organizational unit that this cloud account will be attached to. Use 'null' for root organizational unit.
+
+		Args:
+			vendor (Vendors): The vendor.
+			cloudAccountId (str): Guid ID of the cloud account.
+			organizationalUnitId (str): Guid ID of the Organizational Unit to attach to. Use null in order to attach to root Organizational Unit. Defaults to None.
+
+		Raises:
+			ValueError: Invalid input.
+			Dome9APIException: API command failed.
+		"""
+
+		Dome9APIClient._checkIsUUID(cloudAccountId)
+		Dome9APIClient._checkIsUUID(organizationalUnitId)
+
+		if vendor == Vendors.AWS:
+			self.updateOrganizationalUnitForAWSCloudAccount(cloudAccountId, organizationalUnitId)
+		elif vendor == Vendors.AZURE:
+			self.updateOrganizationalUnitForAzureCloudAccount(cloudAccountId, organizationalUnitId)
+		else:
+			raise NotImplementedError
